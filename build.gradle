@@ -2,16 +2,30 @@ plugins {
     id 'java'
 }
 
-group 'edu.jerseybot'
+group 'com.jerseybot'
 version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    // Spring
+    implementation 'org.springframework.boot:spring-boot-starter:3.0.4'
+    // Discord API
+    implementation 'net.dv8tion:JDA:5.0.0-beta.8'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    // LavaPlayer dependencies
+    implementation 'com.github.sedmelluq:lavaplayer:PR650-SNAPSHOT'
 }
 
 test {
