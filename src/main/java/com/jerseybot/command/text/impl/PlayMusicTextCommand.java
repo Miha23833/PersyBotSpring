@@ -1,5 +1,6 @@
 package com.jerseybot.command.text.impl;
 
+import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import com.jerseybot.music.PlayerRepository;
@@ -7,7 +8,6 @@ import com.jerseybot.music.player.Player;
 import com.jerseybot.utils.BotUtils;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class PlayMusicTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected boolean runBefore(TextCommandExecutionContext context) {
+    protected boolean runBefore(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         validateArgs(context);
 
         Member requestingMember = context.getEvent().getMember();
@@ -43,28 +43,26 @@ public class PlayMusicTextCommand extends AbstractTextCommand {
             return false;
         }
 
-        final TextChannel rspChannel = context.getEvent().getChannel().asTextChannel();
-
         if (!BotUtils.isMemberInVoiceChannel(requestingMember)) {
-            BotUtils.sendMessage("Please join to a voice channel first", rspChannel);
+            rsp.setMessage("Please join to a voice channel first");
             return false;
         }
 
         if (!BotUtils.isMemberInVoiceChannel(context.getGuild().getSelfMember(), voiceChannel.asVoiceChannel())
                 && !BotUtils.canJoin(requestingMember, voiceChannel.asVoiceChannel())) {
-            BotUtils.sendMessage("I cannot connect to your voice channel", rspChannel);
+            rsp.setMessage("I cannot connect to your voice channel");
             return false;
         }
 
         if (!BotUtils.canSpeak(context.getGuild().getSelfMember())) {
-            BotUtils.sendMessage("I cannot speak in your voice channel", rspChannel);
+            rsp.setMessage("I cannot speak in your voice channel");
             return false;
         }
         return true;
     }
 
     @Override
-    protected boolean runCommand(TextCommandExecutionContext context) {
+    protected boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         Member executorMember = Objects.requireNonNull(context.getEvent().getMember());
         VoiceChannel voiceChannel = Objects.requireNonNull(Objects.requireNonNull(executorMember.getVoiceState()).getChannel()).asVoiceChannel();
 

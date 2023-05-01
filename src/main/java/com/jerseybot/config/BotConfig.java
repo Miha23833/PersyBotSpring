@@ -13,6 +13,6 @@ public class BotConfig {
     private String token;
 
     @Getter
-    @Value("${chat.prefix}")
-    private String prefix;
+    @Value("${chat.defaultPrefix}")
+    private String defaultPrefix;
 }

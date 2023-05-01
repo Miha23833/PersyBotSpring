@@ -1,46 +1,36 @@
 package com.jerseybot.command.text;
 
+import com.jerseybot.command.CommandExecutionRsp;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public abstract class AbstractTextCommand {
-    private final List<Function<TextCommandExecutionContext, Boolean>> executingSequence;
+    private final List<BiFunction<TextCommandExecutionContext, CommandExecutionRsp, Boolean>> executingSequence;
 
     protected abstract void validateArgs(TextCommandExecutionContext context);
-    protected abstract boolean runCommand(TextCommandExecutionContext context);
+    protected abstract boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp);
 
     protected AbstractTextCommand() {
         this.executingSequence = Arrays.asList(
                 this::runBefore,
                 this::runCommand,
                 this::runAfter);
+
     }
 
-    protected boolean runBefore(TextCommandExecutionContext context){return true;}
-    protected boolean runAfter(TextCommandExecutionContext context){return true;}
-
-
-    protected abstract String getDescription();
-
-    public final void execute(TextCommandExecutionContext context) {
-        try {
-            boolean canContinue = true;
-            for (Function<TextCommandExecutionContext, Boolean> step: executingSequence) {
-                if (!canContinue) {
-                    return;
-                }
-                canContinue = step.apply(context);
+    protected boolean runBefore(TextCommandExecutionContext context, CommandExecutionRsp rsp){return true;}
+    public final void execute(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
+        boolean canContinue = true;
+        for (BiFunction<TextCommandExecutionContext, CommandExecutionRsp, Boolean> step: executingSequence) {
+            if (!canContinue) {
+                return;
             }
-        } catch (Throwable e) {
-            onException(e, context);
+            canContinue = step.apply(context, rsp);
         }
     }
+    protected boolean runAfter(TextCommandExecutionContext context, CommandExecutionRsp rsp){return true;}
 
-    protected void onException(Throwable e, TextCommandExecutionContext context) {
-//        if (context.getTextChannel().)
-        // TODO: log it
-    }
-
-
+    protected abstract String getDescription();
 }
