@@ -1,6 +1,5 @@
 package com.jerseybot.music.player;
 
-import com.jerseybot.music.AudioContentCache;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -21,23 +20,16 @@ public class Player {
 
     private final TrackScheduler scheduler = new TrackScheduler();
 
-    private final AudioContentCache audioContentCache;
-
     @Autowired
-    public Player(DefaultAudioPlayerManager manager, AudioContentCache audioContentCache) {
+    public Player(DefaultAudioPlayerManager manager) {
         this.audioSourceManager = manager;
         this.audioPlayer = manager.createPlayer();
         this.audioPlayer.addListener(new AudioEventAdapter());
-        this.audioContentCache = audioContentCache;
         this.sendHandler = new AudioPlayerSendHandler(this.audioPlayer);
     }
 
     public void scheduleTrack(String source) {
-        if (audioContentCache.contains(source)) {
-            this.scheduler.addTrack(audioContentCache.get(source).makeClone());
-        } else {
             this.audioSourceManager.loadItemOrdered(this, source, new AudioLoadResultHandler());
-        }
     }
 
     public void skip() {
@@ -53,13 +45,33 @@ public class Player {
         this.audioPlayer.stopTrack();
     }
 
+    public void pause() {
+        this.audioPlayer.setPaused(true);
+    }
+
+    public void resume() {
+        this.audioPlayer.setPaused(false);
+    }
+
+    public boolean isPlaying() {
+        return this.audioPlayer.getPlayingTrack() != null;
+    }
+
+    public boolean isPaused() {
+        return this.audioPlayer.isPaused();
+    }
+
+    public boolean isTracksQueueEmpty() {
+        return this.scheduler.isEmpty();
+    }
+
     private class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler {
         @Override
         public void trackLoaded(AudioTrack track) {
-            if (Player.this.scheduler.isEmpty()) {
+            if (Player.this.scheduler.isEmpty() && !Player.this.isPlaying()) {
+                Player.this.resume();
                 Player.this.audioPlayer.playTrack(track);
             } else {
-                Player.this.audioContentCache.put(track.getIdentifier(), track);
                 Player.this.scheduler.addTrack(track);
             }
         }
@@ -89,11 +101,34 @@ public class Player {
     private class AudioEventAdapter extends com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter {
         @Override
         public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+            if (!endReason.mayStartNext) {
+                return;
+            }
             if (Player.this.scheduler.isEmpty()) {
                 player.stopTrack();
             } else {
                 player.playTrack(Player.this.scheduler.nextTrack());
             }
+        }
+
+        @Override
+        public void onTrackStart(AudioPlayer player, AudioTrack track) {
+            super.onTrackStart(player, track);
+        }
+
+        @Override
+        public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+            super.onTrackException(player, track, exception);
+        }
+
+        @Override
+        public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
+            super.onTrackStuck(player, track, thresholdMs);
+        }
+
+        @Override
+        public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs, StackTraceElement[] stackTrace) {
+            super.onTrackStuck(player, track, thresholdMs, stackTrace);
         }
     }
 }

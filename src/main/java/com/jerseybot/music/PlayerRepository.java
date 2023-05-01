@@ -24,4 +24,8 @@ public class PlayerRepository {
         playersByGuildId.put(guildId, newPlayer);
         return newPlayer;
     }
+
+    public boolean hasInitializedPlayer(Long guildId) {
+        return playersByGuildId.containsKey(guildId);
+    }
 }

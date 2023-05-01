@@ -26,7 +26,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
     // LavaPlayer dependencies
-    implementation 'com.github.sedmelluq:lavaplayer:PR650-SNAPSHOT'
+    implementation 'com.github.en-you:lavaplayer:1.3.80-beta'
 }
 
 test {

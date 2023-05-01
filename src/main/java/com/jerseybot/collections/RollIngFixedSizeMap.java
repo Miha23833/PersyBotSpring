@@ -1,6 +1,5 @@
 package com.jerseybot.collections;
 
-import org.apache.commons.collections4.map.FixedSizeMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +22,7 @@ public class RollIngFixedSizeMap<K, V> implements Map<K, V> {
         }
         this.capacity = capacity;
 
-        map = FixedSizeMap.fixedSizeMap(new HashMap<>(capacity));
+        map = new HashMap<>();
         keys = new LinkedList<>();
     }
 
@@ -56,7 +55,7 @@ public class RollIngFixedSizeMap<K, V> implements Map<K, V> {
     @Override
     public V put(K key, V value) {
         if (keys.size() > capacity) {
-            keys.removeLast();
+            map.remove(keys.removeLast());
         }
         keys.add(key);
         map.put(key, value);
@@ -66,8 +65,7 @@ public class RollIngFixedSizeMap<K, V> implements Map<K, V> {
     @Override
     public V remove(Object key) {
         if (map.containsKey(key)) {
-            keys.remove(key);
-            return map.remove(key);
+            return map.remove(keys.remove(key));
         }
         return null;
     }
