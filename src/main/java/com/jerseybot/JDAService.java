@@ -1,7 +1,9 @@
 package com.jerseybot;
 
-import com.jerseybot.adapters.UserEventListener;
+import com.jerseybot.adapters.UserInteractionEventListener;
 import com.jerseybot.config.BotConfig;
+import lombok.Getter;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,22 +11,21 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @SpringBootApplication
-public class JerseyBot implements CommandLineRunner {
+public class JDAService implements CommandLineRunner {
+    @Getter
+    private final JDA jda;
     private final ApplicationContext applicationContext;
 
     @Autowired
-    public JerseyBot(ApplicationContext applicationContext) {
+    public JDAService(ApplicationContext applicationContext) throws InterruptedException {
         this.applicationContext = applicationContext;
-    }
 
-    @Override
-    public void run(String... args) {
-        JDABuilder.createDefault(applicationContext.getBean(BotConfig.class).getToken())
+        this. jda = JDABuilder.createDefault(applicationContext.getBean(BotConfig.class).getToken())
                 .enableIntents(GatewayIntent.GUILD_MEMBERS,
                         GatewayIntent.GUILD_MODERATION,
                         GatewayIntent.GUILD_WEBHOOKS,
@@ -37,11 +38,17 @@ public class JerseyBot implements CommandLineRunner {
                         GatewayIntent.DIRECT_MESSAGE_REACTIONS,
                         GatewayIntent.DIRECT_MESSAGE_TYPING,
                         GatewayIntent.MESSAGE_CONTENT)
-                .addEventListeners(applicationContext.getBean(UserEventListener.class))
-                .build();
+                .addEventListeners(applicationContext.getBean(UserInteractionEventListener.class))
+                .build()
+                .awaitReady();
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        // Run as JDA instance created
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(JerseyBot.class, args);
+        SpringApplication.run(JDAService.class, args);
     }
 }

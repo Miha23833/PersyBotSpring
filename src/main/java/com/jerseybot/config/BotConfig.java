@@ -15,4 +15,6 @@ public class BotConfig {
     @Getter
     @Value("${chat.defaultPrefix}")
     private String defaultPrefix;
+
+
 }
