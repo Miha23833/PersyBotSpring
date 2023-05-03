@@ -6,9 +6,13 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lombok.Getter;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static com.jerseybot.utils.DateTimeUtils.toTimeDuration;
 
 @Component
 public class Player {
@@ -20,6 +24,8 @@ public class Player {
 
     private final TrackScheduler scheduler = new TrackScheduler();
 
+    private TextChannel lastUsedTextChannel;
+
     @Autowired
     public Player(DefaultAudioPlayerManager manager) {
         this.audioSourceManager = manager;
@@ -28,8 +34,9 @@ public class Player {
         this.sendHandler = new AudioPlayerSendHandler(this.audioPlayer);
     }
 
-    public void scheduleTrack(String source) {
-            this.audioSourceManager.loadItemOrdered(this, source, new AudioLoadResultHandler());
+    public void scheduleTrack(String source, TextChannel rspChannel) {
+        this.lastUsedTextChannel = rspChannel;
+        this.audioSourceManager.loadItemOrdered(this, source, new AudioLoadResultHandler(source));
     }
 
     public void skip() {
@@ -66,13 +73,19 @@ public class Player {
     }
 
     private class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler {
+        private final String source;
+
+        private AudioLoadResultHandler(String source) {
+            this.source = source;
+        }
+
         @Override
         public void trackLoaded(AudioTrack track) {
-            if (Player.this.scheduler.isEmpty() && !Player.this.isPlaying()) {
-                Player.this.resume();
-                Player.this.audioPlayer.playTrack(track);
+            if (scheduler.isEmpty() && !isPlaying()) {
+                resume();
+                audioPlayer.playTrack(track);
             } else {
-                Player.this.scheduler.addTrack(track);
+                scheduler.addTrack(track);
             }
         }
 
@@ -82,14 +95,14 @@ public class Player {
                 trackLoaded(playlist.getTracks().get(0));
             } else {
                 for (AudioTrack track : playlist.getTracks()) {
-                    Player.this.scheduler.addTrack(track);
+                    scheduler.addTrack(track);
                 }
             }
         }
 
         @Override
         public void noMatches() {
-            System.out.println("no matches");
+            lastUsedTextChannel.sendMessage("Could not find \"" + this.source + "\"").queue();
         }
 
         @Override
@@ -99,21 +112,29 @@ public class Player {
     }
 
     private class AudioEventAdapter extends com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter {
+        private int playTries = 0;
+        private final int maxPlayTries = 3;
+
         @Override
         public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
             if (!endReason.mayStartNext) {
                 return;
             }
-            if (Player.this.scheduler.isEmpty()) {
+            if (endReason.equals(AudioTrackEndReason.LOAD_FAILED) && playTries++ < maxPlayTries) {
+                player.playTrack(track.makeClone());
+            } else if (scheduler.isEmpty()) {
                 player.stopTrack();
             } else {
-                player.playTrack(Player.this.scheduler.nextTrack());
+                player.playTrack(scheduler.nextTrack());
             }
         }
 
         @Override
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
-            super.onTrackStart(player, track);
+            this.playTries = 0;
+            AudioTrackInfo info = track.getInfo();
+            lastUsedTextChannel.sendMessage("Now playing: " + info.author + " - " + info.title +
+                    " (" + toTimeDuration(info.length) + ")").queue();
         }
 
         @Override

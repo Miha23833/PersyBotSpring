@@ -77,7 +77,7 @@ public class PlayMusicTextCommand extends AbstractTextCommand {
         if (!isUrl(requestingTrack)) {
             requestingTrack = "ytsearch:" + requestingTrack;
         }
-        player.scheduleTrack(requestingTrack);
+        player.scheduleTrack(requestingTrack, context.getTextChannel());
         if (context.getGuild().getAudioManager().getSendingHandler() == null) {
             context.getGuild().getAudioManager().setSendingHandler(player.getSendHandler());
         }
