@@ -1,5 +1,6 @@
 package com.jerseybot.command.text.impl;
 
+import com.jerseybot.chat.MessageSendService;
 import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
@@ -20,10 +21,12 @@ import static org.springframework.core.io.support.ResourcePatternUtils.isUrl;
 @Component
 public class PlayMusicTextCommand extends AbstractTextCommand {
     private final PlayerRepository playerRepository;
+    private final MessageSendService messageSendService;
 
     @Autowired
-    public PlayMusicTextCommand(PlayerRepository playerRepository) {
+    public PlayMusicTextCommand(PlayerRepository playerRepository, MessageSendService messageSendService) {
         this.playerRepository = playerRepository;
+        this.messageSendService = messageSendService;
     }
 
     @Override
@@ -68,7 +71,7 @@ public class PlayMusicTextCommand extends AbstractTextCommand {
 
         if (!BotUtils.isMemberInSameVoiceChannelAsBot(context.getEvent().getMember(), context.getGuild().getSelfMember())) {
             context.getGuild().getAudioManager().openAudioConnection(voiceChannel);
-            BotUtils.sendMessage("Connected to " + voiceChannel.getName(), context.getEvent().getChannel().asTextChannel());
+            messageSendService.sendInfoMessage(context.getEvent().getChannel().asTextChannel(), "Connected to " + voiceChannel.getName());
         }
 
         Player player = playerRepository.get(context.getGuildId());

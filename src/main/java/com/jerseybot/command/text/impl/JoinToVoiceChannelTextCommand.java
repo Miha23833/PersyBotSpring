@@ -1,5 +1,6 @@
 package com.jerseybot.command.text.impl;
 
+import com.jerseybot.chat.MessageSendService;
 import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
@@ -8,12 +9,20 @@ import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
 public class JoinToVoiceChannelTextCommand extends AbstractTextCommand {
+    private final MessageSendService messageSendService;
+
+    @Autowired
+    public JoinToVoiceChannelTextCommand(MessageSendService messageSendService) {
+        this.messageSendService = messageSendService;
+    }
+
     @Override
     protected void validateArgs(TextCommandExecutionContext context) {
 
@@ -53,7 +62,7 @@ public class JoinToVoiceChannelTextCommand extends AbstractTextCommand {
 
         if (!BotUtils.isMemberInSameVoiceChannelAsBot(context.getEvent().getMember(), context.getGuild().getSelfMember())) {
             context.getGuild().getAudioManager().openAudioConnection(voiceChannel);
-            BotUtils.sendMessage("Connected to " + voiceChannel.getName(), context.getEvent().getChannel().asTextChannel());
+            messageSendService.sendInfoMessage(context.getEvent().getChannel().asTextChannel(), rsp.getMessage());
         }
         return true;
     }

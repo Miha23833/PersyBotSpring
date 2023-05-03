@@ -38,7 +38,6 @@ public class JDAService implements CommandLineRunner {
                         GatewayIntent.DIRECT_MESSAGE_REACTIONS,
                         GatewayIntent.DIRECT_MESSAGE_TYPING,
                         GatewayIntent.MESSAGE_CONTENT)
-                .addEventListeners(applicationContext.getBean(UserInteractionEventListener.class))
                 .build()
                 .awaitReady();
     }

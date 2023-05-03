@@ -1,5 +1,7 @@
 package com.jerseybot.music.player;
 
+import com.jerseybot.chat.MessageSendService;
+import com.jerseybot.command.button.enums.PLAYER_BUTTON;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -18,6 +20,7 @@ import static com.jerseybot.utils.DateTimeUtils.toTimeDuration;
 public class Player {
     private final DefaultAudioPlayerManager audioSourceManager;
     private final AudioPlayer audioPlayer;
+    private final MessageSendService messageSendService;
 
     @Getter
     private final AudioPlayerSendHandler sendHandler;
@@ -27,9 +30,10 @@ public class Player {
     private TextChannel lastUsedTextChannel;
 
     @Autowired
-    public Player(DefaultAudioPlayerManager manager) {
+    public Player(DefaultAudioPlayerManager manager, MessageSendService messageSendService) {
         this.audioSourceManager = manager;
         this.audioPlayer = manager.createPlayer();
+        this.messageSendService = messageSendService;
         this.audioPlayer.addListener(new AudioEventAdapter());
         this.sendHandler = new AudioPlayerSendHandler(this.audioPlayer);
     }
@@ -102,7 +106,7 @@ public class Player {
 
         @Override
         public void noMatches() {
-            lastUsedTextChannel.sendMessage("Could not find \"" + this.source + "\"").queue();
+            messageSendService.sendErrorMessage(lastUsedTextChannel, "Could not find \"" + this.source + "\"");
         }
 
         @Override
@@ -133,8 +137,8 @@ public class Player {
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
             this.playTries = 0;
             AudioTrackInfo info = track.getInfo();
-            lastUsedTextChannel.sendMessage("Now playing: " + info.author + " - " + info.title +
-                    " (" + toTimeDuration(info.length) + ")").queue();
+            String title = info.author + " - " + info.title + " (" + toTimeDuration(info.length) + ")";
+            messageSendService.sendNowPlaying(lastUsedTextChannel, title, player.isPaused());
         }
 
         @Override

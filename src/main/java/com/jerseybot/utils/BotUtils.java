@@ -44,18 +44,6 @@ public interface BotUtils {
         return selfMember.hasPermission(Permission.MESSAGE_SEND) && targetChannel.canTalk();
     }
 
-    static void sendMessage(@NotNull String text, @NotNull TextChannel channel) {
-        channel.sendMessage(text).queue();
-    }
-
-    static void sendMessage(@NotNull MessageCreateData message, @NotNull TextChannel channel) {
-        channel.sendMessage(message).queue();
-    }
-
-    static void sendPersonalMessage(@NotNull String text, @NotNull User user) {
-        user.openPrivateChannel().queue((channel) -> channel.sendMessage(text).queue());
-    }
-
 //    static void sendPageableMessage(PageableMessage.Builder message, TextChannel channel, PAGEABLE_MESSAGE_TYPE type) {
 //        sendPageableMessage(
 //                message,

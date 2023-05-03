@@ -1,5 +1,7 @@
 package com.jerseybot.adapters;
 
+import com.jerseybot.JDAService;
+import com.jerseybot.chat.MessageSendService;
 import com.jerseybot.command.ButtonCommandRouter;
 import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.TextCommandRouter;
@@ -17,15 +19,21 @@ import org.springframework.stereotype.Component;
 public class UserInteractionEventListener extends ListenerAdapter {
     private final TextCommandRouter textCommandRouter;
     private final ButtonCommandRouter buttonCommandRouter;
+    private final MessageSendService messageSendService;
 
     // TODO: move to db and keep dynamically
     private final String prefix = "$";
 
     @Autowired
     public UserInteractionEventListener(TextCommandRouter textCommandRouter,
-                                        ButtonCommandRouter buttonCommandRouter) {
+                                        ButtonCommandRouter buttonCommandRouter,
+                                        MessageSendService messageSendService,
+                                        JDAService jdaService) {
         this.textCommandRouter = textCommandRouter;
         this.buttonCommandRouter = buttonCommandRouter;
+        this.messageSendService = messageSendService;
+
+        jdaService.getJda().addEventListener(this);
     }
 
 
@@ -40,7 +48,7 @@ public class UserInteractionEventListener extends ListenerAdapter {
         textCommandRouter.route(new TextCommandExecutionContext(event, prefix), rsp);
 
         if (rsp.getMessage() != null) {
-            event.getMessage().getChannel().asTextChannel().sendMessage(rsp.getMessage()).queue();
+            messageSendService.sendErrorMessage(event.getMessage().getChannel().asTextChannel(), rsp.getMessage());
         }
         if (rsp.getException() != null) {
             // TODO: log it
