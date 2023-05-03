@@ -26,31 +26,4 @@ public class ApplicationConfiguration {
         manager.registerSourceManager(new TwitchStreamAudioSourceManager());
         return manager;
     }
-
-//    @Bean
-//    public AudioContentCache getAudioContentCache(@Value("${player.cacheSize}") int cacheSize) {
-//        return new AudioContentCache(cacheSize);
-//    }
-//
-//    @Bean
-//    public Player getPlayer(DefaultAudioPlayerManager audioSourceManager, AudioContentCache audioContentCache) {
-//        return new Player(audioSourceManager, audioContentCache);
-//    }
-//
-//    @Bean
-//    public PlayerRepository getPlayerRepository() {
-//        return new PlayerRepository();
-//    }
-//
-//    @Bean
-//    public PlayMusicTextCommand getPlayMusicTextCommand(PlayerRepository playerRepository) {
-//        return new PlayMusicTextCommand(playerRepository);
-//    }
-//
-//    @Bean
-//    public UserEventListener getUserEventListener(PlayMusicTextCommand playMusicTextCommand) {
-//        return new UserEventListener(playMusicTextCommand);
-//    }
-
-
 }

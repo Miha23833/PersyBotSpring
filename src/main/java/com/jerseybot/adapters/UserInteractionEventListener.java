@@ -1,10 +1,9 @@
 package com.jerseybot.adapters;
 
-import com.jerseybot.chat.TextChannelsToInteractStore;
-import com.jerseybot.command.CommandExecutionRsp;
-import com.jerseybot.command.button.ButtonCommandContext;
 import com.jerseybot.command.ButtonCommandRouter;
+import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.TextCommandRouter;
+import com.jerseybot.command.button.ButtonCommandContext;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -13,8 +12,6 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 @Component
 public class UserInteractionEventListener extends ListenerAdapter {
