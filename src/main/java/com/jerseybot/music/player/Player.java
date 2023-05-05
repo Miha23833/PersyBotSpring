@@ -138,7 +138,7 @@ public class Player {
             this.playTries = 0;
             AudioTrackInfo info = track.getInfo();
             String title = info.author + " - " + info.title + " (" + toTimeDuration(info.length) + ")";
-            messageSendService.sendNowPlaying(lastUsedTextChannel, title, player.isPaused());
+            messageSendService.sendNowPlaying(lastUsedTextChannel, title, player.isPaused(), scheduler.isEmpty());
         }
 
         @Override

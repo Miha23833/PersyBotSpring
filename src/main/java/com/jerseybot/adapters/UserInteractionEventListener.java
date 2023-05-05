@@ -57,18 +57,16 @@ public class UserInteractionEventListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (!event.getMessage().getAuthor().isBot()) {
-            if (event.getMessage().getContentRaw().startsWith(prefix)) {
-                CommandExecutionRsp rsp = new CommandExecutionRsp();
-                buttonCommandRouter.route(new ButtonCommandContext(event), rsp);
+        if (event.getMessage().getAuthor().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
+            CommandExecutionRsp rsp = new CommandExecutionRsp();
+            buttonCommandRouter.route(new ButtonCommandContext(event), rsp);
 
-                if (rsp.getMessage() != null || rsp.getException() != null) {
-                    event.getMessage()
-                            .editMessage(MessageEditBuilder.fromMessage(event.getMessage()).setActionRow().build())
-                            .queue();
-                } else if (!event.getInteraction().isAcknowledged()) {
-                    event.getInteraction().deferEdit().queue();
-                }
+            if (rsp.getMessage() != null || rsp.getException() != null) {
+                event.getMessage()
+                        .editMessage(MessageEditBuilder.fromMessage(event.getMessage()).setActionRow().build())
+                        .queue();
+            } else if (!event.getInteraction().isAcknowledged()) {
+                event.getInteraction().deferEdit().queue();
             }
         }
     }

@@ -29,6 +29,6 @@ public class SkipAudioPlayerButtonCommand implements ButtonCommand {
         }
 
         player.skip();
-        context.getEvent().getInteraction().editButton(PLAYER_BUTTON.RESUME.button()).queue();
+        context.getEvent().getInteraction().editButton(PLAYER_BUTTON.SKIP.button(player.isTracksQueueEmpty())).queue();
     }
 }

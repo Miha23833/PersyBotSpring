@@ -30,14 +30,14 @@ public class MessageSendService {
         sendMessage(textChannel, "Error", content, MessageType.ERROR);
     }
 
-    public void sendNowPlaying(TextChannel textChannel, String title, boolean isPlayerPaused) {
+    public void sendNowPlaying(TextChannel textChannel, String title, boolean isPlayerPaused, boolean isNextTrackAbsent) {
         if (textChannel.canTalk()) {
             textChannel
                     .sendMessage(new InfoMessage("Now playing:", title).template())
                     .setActionRow(
                             PLAYER_BUTTON.STOP.button(),
                             isPlayerPaused ? PLAYER_BUTTON.RESUME.button() : PLAYER_BUTTON.PAUSE.button(),
-                            PLAYER_BUTTON.SKIP.button())
+                            PLAYER_BUTTON.SKIP.button(isNextTrackAbsent))
                     .queue(msg -> selfMessagesCleaner.addMessage(MessageType.PLAYER_NOW_PLAYING, textChannel.getIdLong(), msg.getIdLong()));
         }
     }

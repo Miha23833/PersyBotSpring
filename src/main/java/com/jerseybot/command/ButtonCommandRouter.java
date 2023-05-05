@@ -7,6 +7,7 @@ import com.jerseybot.command.button.enums.BUTTON_ID;
 import com.jerseybot.command.button.impl.PauseAudioPlayerButtonCommand;
 import com.jerseybot.command.button.impl.ResumeAudioPlayerButtonCommand;
 import com.jerseybot.command.button.impl.SkipAudioPlayerButtonCommand;
+import com.jerseybot.command.button.impl.StopAudioPlayerButtonCommand;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import org.apache.commons.collections4.map.UnmodifiableMap;
@@ -24,11 +25,13 @@ public class ButtonCommandRouter {
     @Autowired
     public ButtonCommandRouter(PauseAudioPlayerButtonCommand pauseAudioPlayerButtonCommand,
                                ResumeAudioPlayerButtonCommand resumeAudioPlayerButtonCommand,
-                               SkipAudioPlayerButtonCommand skipAudioPlayerButtonCommand) {
+                               SkipAudioPlayerButtonCommand skipAudioPlayerButtonCommand,
+                               StopAudioPlayerButtonCommand stopAudioPlayerButtonCommand) {
         Map<String, ButtonCommand> routes = new HashMap<>();
         registerRoutes(routes, BUTTON_ID.PLAYER_PAUSE, pauseAudioPlayerButtonCommand);
         registerRoutes(routes, BUTTON_ID.PLAYER_RESUME, resumeAudioPlayerButtonCommand);
         registerRoutes(routes, BUTTON_ID.PLAYER_SKIP, skipAudioPlayerButtonCommand);
+        registerRoutes(routes, BUTTON_ID.PLAYER_STOP, stopAudioPlayerButtonCommand);
         this.buttonCommandRoutes = Collections.unmodifiableMap(routes);
     }
 
