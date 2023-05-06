@@ -28,8 +28,15 @@ dependencies {
     // LavaPlayer dependencies
     implementation 'com.github.en-you:lavaplayer:1.3.80-beta'
 
+    // Spotify API
+    implementation 'se.michaelthelin.spotify:spotify-web-api-java:8.0.0'
+
+    // YT API
+    implementation 'com.google.apis:google-api-services-youtube:v3-rev20230123-2.0.0'
+
     // Commons
-    implementation "com.google.guava:guava:31.0.1-jre"
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.konghq:unirest-java:3.14.2'
 }
 
 test {
