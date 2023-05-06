@@ -4,7 +4,9 @@ import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.button.ButtonCommand;
 import com.jerseybot.command.button.ButtonCommandContext;
 import com.jerseybot.command.button.enums.BUTTON_ID;
+import com.jerseybot.command.button.impl.NextPageCommand;
 import com.jerseybot.command.button.impl.PauseAudioPlayerButtonCommand;
+import com.jerseybot.command.button.impl.PrevPageCommand;
 import com.jerseybot.command.button.impl.ResumeAudioPlayerButtonCommand;
 import com.jerseybot.command.button.impl.SkipAudioPlayerButtonCommand;
 import com.jerseybot.command.button.impl.StopAudioPlayerButtonCommand;
@@ -26,12 +28,17 @@ public class ButtonCommandRouter {
     public ButtonCommandRouter(PauseAudioPlayerButtonCommand pauseAudioPlayerButtonCommand,
                                ResumeAudioPlayerButtonCommand resumeAudioPlayerButtonCommand,
                                SkipAudioPlayerButtonCommand skipAudioPlayerButtonCommand,
-                               StopAudioPlayerButtonCommand stopAudioPlayerButtonCommand) {
+                               StopAudioPlayerButtonCommand stopAudioPlayerButtonCommand,
+                               NextPageCommand nextPageCommand,
+                               PrevPageCommand prevPageCommand
+                               ) {
         Map<String, ButtonCommand> routes = new HashMap<>();
         registerRoutes(routes, BUTTON_ID.PLAYER_PAUSE, pauseAudioPlayerButtonCommand);
         registerRoutes(routes, BUTTON_ID.PLAYER_RESUME, resumeAudioPlayerButtonCommand);
         registerRoutes(routes, BUTTON_ID.PLAYER_SKIP, skipAudioPlayerButtonCommand);
         registerRoutes(routes, BUTTON_ID.PLAYER_STOP, stopAudioPlayerButtonCommand);
+        registerRoutes(routes, BUTTON_ID.NEXT_PAGE, nextPageCommand);
+        registerRoutes(routes, BUTTON_ID.PREV_PAGE, prevPageCommand);
         this.buttonCommandRoutes = Collections.unmodifiableMap(routes);
     }
 

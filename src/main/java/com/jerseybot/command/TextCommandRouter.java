@@ -7,6 +7,7 @@ import com.jerseybot.command.text.impl.LeaveVoiceChannelTextCommand;
 import com.jerseybot.command.text.impl.PauseMusicTextCommand;
 import com.jerseybot.command.text.impl.PlayMusicTextCommand;
 import com.jerseybot.command.text.impl.ResumeMusicTextCommand;
+import com.jerseybot.command.text.impl.ShowQueueTextCommand;
 import com.jerseybot.command.text.impl.SkipMusicTextCommand;
 import com.jerseybot.command.text.impl.StopMusicTextCommand;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,8 @@ public class TextCommandRouter {
                              PauseMusicTextCommand pauseMusicTextCommand,
                              JoinToVoiceChannelTextCommand joinToVoiceChannelTextCommand,
                              LeaveVoiceChannelTextCommand leaveVoiceChannelTextCommand,
-                             SkipMusicTextCommand skipMusicTextCommand) {
+                             SkipMusicTextCommand skipMusicTextCommand,
+                             ShowQueueTextCommand showQueueTextCommand) {
         Map<String, AbstractTextCommand> routes = new HashMap<>();
 
         registerRoutes(routes, playMusicTextCommand, "play", "p");
@@ -37,6 +39,7 @@ public class TextCommandRouter {
         registerRoutes(routes, joinToVoiceChannelTextCommand, "join", "j");
         registerRoutes(routes, leaveVoiceChannelTextCommand, "leave", "l");
         registerRoutes(routes, skipMusicTextCommand, "skip");
+        registerRoutes(routes, showQueueTextCommand, "queue");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }

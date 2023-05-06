@@ -3,6 +3,10 @@ package com.jerseybot.chat;
 import com.jerseybot.chat.cleaner.MessageType;
 import com.jerseybot.chat.cleaner.SelfMessagesCleaner;
 import com.jerseybot.chat.message.template.InfoMessage;
+import com.jerseybot.chat.message.template.PagingMessage;
+import com.jerseybot.chat.pagination.PAGEABLE_MESSAGE_TYPE;
+import com.jerseybot.chat.pagination.PageableMessage;
+import com.jerseybot.chat.pagination.PaginationService;
 import com.jerseybot.command.button.enums.PLAYER_BUTTON;
 import jakarta.annotation.Nullable;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -12,10 +16,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class MessageSendService {
     private final SelfMessagesCleaner selfMessagesCleaner;
+    private final PaginationService paginationService;
 
     @Autowired
-    public MessageSendService(SelfMessagesCleaner selfMessagesCleaner) {
+    public MessageSendService(SelfMessagesCleaner selfMessagesCleaner, PaginationService paginationService) {
         this.selfMessagesCleaner = selfMessagesCleaner;
+        this.paginationService = paginationService;
     }
 
     public void sendInfoMessage(TextChannel textChannel, String content) {
@@ -39,6 +45,15 @@ public class MessageSendService {
                             isPlayerPaused ? PLAYER_BUTTON.RESUME.button() : PLAYER_BUTTON.PAUSE.button(),
                             PLAYER_BUTTON.SKIP.button(isNextTrackAbsent))
                     .queue(msg -> selfMessagesCleaner.addMessage(MessageType.PLAYER_NOW_PLAYING, textChannel.getIdLong(), msg.getIdLong()));
+        }
+    }
+
+    public void sendPageableMessage(PageableMessage.Builder message, TextChannel channel, PAGEABLE_MESSAGE_TYPE type) {
+        if (message.size() == 1) {
+            channel.sendMessage(new PagingMessage(message.get(0), false, false).template()).queue();
+        } else if (message.size() > 1) {
+            channel.sendMessage(new PagingMessage(message.get(0), false, true).template())
+                    .queue(success -> paginationService.registerPagination(success.getChannel().getIdLong(), type, message.build(success.getIdLong())));
         }
     }
 

@@ -1,7 +1,6 @@
 package com.jerseybot.music.player;
 
 import com.jerseybot.chat.MessageSendService;
-import com.jerseybot.command.button.enums.PLAYER_BUTTON;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -13,6 +12,8 @@ import lombok.Getter;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static com.jerseybot.utils.DateTimeUtils.toTimeDuration;
 
@@ -74,6 +75,10 @@ public class Player {
 
     public boolean isTracksQueueEmpty() {
         return this.scheduler.isEmpty();
+    }
+
+    public List<AudioTrack> getScheduledTracks() {
+        return this.scheduler.getTracks();
     }
 
     private class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler {
