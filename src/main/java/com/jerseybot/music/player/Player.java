@@ -1,6 +1,7 @@
 package com.jerseybot.music.player;
 
 import com.jerseybot.chat.MessageSendService;
+import com.jerseybot.chat.message.template.InfoMessage;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -96,6 +97,9 @@ public class Player {
                 audioPlayer.playTrack(track);
             } else {
                 scheduler.addTrack(track);
+                lastUsedTextChannel.get()
+                        .sendMessage(new InfoMessage("Queued track: ", track.getInfo().author + " - " + track.getInfo().title + " (" + toTimeDuration(track.getInfo().length) + ")").template())
+                        .queue();
             }
         }
 

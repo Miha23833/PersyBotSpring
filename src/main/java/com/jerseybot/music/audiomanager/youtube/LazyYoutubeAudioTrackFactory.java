@@ -43,15 +43,8 @@ public class LazyYoutubeAudioTrackFactory {
     public LazyYoutubeAudioTrack getAudioTrack(Track track) {
         String author = Arrays.stream(track.getArtists()).map(ArtistSimplified::getName).collect(Collectors.joining(", "));
         String title = track.getName();
-        if (title.chars().filter(ch -> ch == '-').count() == 1 && !title.startsWith("-") && !title.endsWith("-")) {
-            author = title.substring(0, title.indexOf("-")).trim();
-            title = title.substring(title.indexOf('-') + 1).trim();
-        } else if (title.chars().filter(ch -> ch == '\u2014').count() == 1 && !title.startsWith("\u2014") && !title.endsWith("\u2014")) {
-            author = title.substring(0, title.indexOf('\u2014')).trim();
-            title = title.substring(title.indexOf('\u2014') + 1).trim();
-        }
         long durationMillis = track.getDurationMs();
-        AudioTrackInfo info = new AudioTrackInfo(title, author, durationMillis, track.getId(), false, "https://www. https://open.spotify.com/track/" + track.getId(), new HashMap<>());
+        AudioTrackInfo info = new AudioTrackInfo(title, author, durationMillis, track.getId(), false, "https://open.spotify.com/track/" + track.getId(), new HashMap<>());
         return new LazyYoutubeAudioTrack(info, ytAudioSourceManager, ytSearchProvider);
     }
 
