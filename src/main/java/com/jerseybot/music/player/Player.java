@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jerseybot.utils.DateTimeUtils.toTimeDuration;
 
@@ -28,7 +29,7 @@ public class Player {
 
     private final TrackScheduler scheduler = new TrackScheduler();
 
-    private TextChannel lastUsedTextChannel;
+    private final AtomicReference<TextChannel> lastUsedTextChannel = new AtomicReference<>();
 
     @Autowired
     public Player(DefaultAudioPlayerManager manager, MessageSendService messageSendService) {
@@ -40,7 +41,7 @@ public class Player {
     }
 
     public void scheduleTrack(String source, TextChannel rspChannel) {
-        this.lastUsedTextChannel = rspChannel;
+        this.lastUsedTextChannel.set(rspChannel);
         this.audioSourceManager.loadItemOrdered(this, source, new AudioLoadResultHandler(source));
     }
 
@@ -111,7 +112,7 @@ public class Player {
 
         @Override
         public void noMatches() {
-            messageSendService.sendErrorMessage(lastUsedTextChannel, "Could not find \"" + this.source + "\"");
+            messageSendService.sendErrorMessage(lastUsedTextChannel.get(), "Could not find \"" + this.source + "\"");
         }
 
         @Override
@@ -143,7 +144,7 @@ public class Player {
             this.playTries = 0;
             AudioTrackInfo info = track.getInfo();
             String title = info.author + " - " + info.title + " (" + toTimeDuration(info.length) + ")";
-            messageSendService.sendNowPlaying(lastUsedTextChannel, title, player.isPaused(), scheduler.isEmpty());
+            messageSendService.sendNowPlaying(lastUsedTextChannel.get(), title, player.isPaused(), scheduler.isEmpty());
         }
 
         @Override
