@@ -1,27 +1,42 @@
 package com.jerseybot.chat;
 
 import com.jerseybot.chat.cleaner.MessageType;
-import com.jerseybot.chat.cleaner.SelfMessagesCleaner;
+import com.jerseybot.chat.cleaner.SelfMessageStore;
 import com.jerseybot.chat.message.template.InfoMessage;
 import com.jerseybot.chat.message.template.PagingMessage;
 import com.jerseybot.chat.pagination.PAGEABLE_MESSAGE_TYPE;
 import com.jerseybot.chat.pagination.PageableMessage;
 import com.jerseybot.chat.pagination.PaginationService;
+import com.jerseybot.command.button.enums.BUTTON_ID;
 import com.jerseybot.command.button.enums.PLAYER_BUTTON;
 import jakarta.annotation.Nullable;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Service
 public class MessageSendService {
-    private final SelfMessagesCleaner selfMessagesCleaner;
+    private final SelfMessageStore selfMessageStore;
     private final PaginationService paginationService;
 
+    private final Set<String> playerButtonIds;
+
+
     @Autowired
-    public MessageSendService(SelfMessagesCleaner selfMessagesCleaner, PaginationService paginationService) {
-        this.selfMessagesCleaner = selfMessagesCleaner;
+    public MessageSendService(SelfMessageStore selfMessageStore, PaginationService paginationService) {
+        this.selfMessageStore = selfMessageStore;
         this.paginationService = paginationService;
+        this.playerButtonIds = Stream.of(BUTTON_ID.PLAYER_PAUSE, BUTTON_ID.PLAYER_RESUME, BUTTON_ID.PLAYER_SKIP, BUTTON_ID.PLAYER_STOP).map(BUTTON_ID::getId).collect(Collectors.toSet());
     }
 
     public void sendInfoMessage(TextChannel textChannel, String content) {
@@ -44,7 +59,15 @@ public class MessageSendService {
                             PLAYER_BUTTON.STOP.button(),
                             isPlayerPaused ? PLAYER_BUTTON.RESUME.button() : PLAYER_BUTTON.PAUSE.button(),
                             PLAYER_BUTTON.SKIP.button(isNextTrackAbsent))
-                    .queue(msg -> selfMessagesCleaner.addMessage(MessageType.PLAYER_NOW_PLAYING, textChannel.getIdLong(), msg.getIdLong()));
+                    .queue(msg -> selfMessageStore.addMessage(MessageType.PLAYER_NOW_PLAYING, textChannel.getIdLong(), msg.getIdLong()));
+        }
+    }
+
+    public void sendQueuedTrack(TextChannel textChannel, String title, boolean isPlayerPaused) {
+        if (textChannel.canTalk()) {
+            textChannel
+                    .sendMessage(new InfoMessage("Queued track: ", title).template())
+                    .queue(msg -> updatePlayerButtons(textChannel, isPlayerPaused, false));
         }
     }
 
@@ -62,10 +85,36 @@ public class MessageSendService {
             textChannel.sendMessage(new InfoMessage(title, content).template())
                     .queue((msg) -> {
                         if (messageType != null) {
-                            selfMessagesCleaner.addMessage(messageType, textChannel.getIdLong(), msg.getIdLong());
+                            selfMessageStore.addMessage(messageType, textChannel.getIdLong(), msg.getIdLong());
                         }
                     });
         }
     }
 
+    private void updatePlayerButtons(TextChannel textChannel, boolean isPlayerPaused, boolean isNextTrackAbsent) {
+        textChannel.getHistory().retrievePast(10).queue(
+                lastMessagesInTextChannel -> lastMessagesInTextChannel.stream().filter(message -> {
+                    if (message.getActionRows().isEmpty()) {
+                        return false;
+                    }
+                    List<ItemComponent> components = message.getActionRows().get(0).getComponents();
+                    if (components.isEmpty()) {
+                        return false;
+                    }
+                    if (components.stream().noneMatch((ic -> ic instanceof Button))) {
+                        return false;
+                    }
+                    return containsExactlyButtons(message, playerButtonIds);
+                }).findFirst().ifPresent(message -> message.editMessage(MessageEditData.fromMessage(message))
+                        .setActionRow(
+                                PLAYER_BUTTON.STOP.button(),
+                                isPlayerPaused ? PLAYER_BUTTON.RESUME.button() : PLAYER_BUTTON.PAUSE.button(),
+                                PLAYER_BUTTON.SKIP.button(isNextTrackAbsent))
+                        .queue())
+        );
+    }
+
+    private boolean containsExactlyButtons(Message message, Set<String> buttonIds) {
+        return message.getButtons().stream().map(Button::getId).filter(Objects::nonNull).allMatch(buttonIds::contains);
+    }
 }

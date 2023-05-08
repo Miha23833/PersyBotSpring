@@ -9,7 +9,6 @@ import com.jerseybot.command.button.ButtonCommandContext;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import com.jerseybot.db.entities.DiscordServer;
 import com.jerseybot.db.repositories.DiscordServerRepository;
-import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -39,7 +38,6 @@ public class UserInteractionEventListener extends ListenerAdapter {
     }
 
     @Override
-    @Transactional
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         if (event.getMessage().getAuthor().isBot() || !event.getMessage().getChannel().asTextChannel().canTalk()) {
             return;

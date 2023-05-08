@@ -97,9 +97,10 @@ public class Player {
                 audioPlayer.playTrack(track);
             } else {
                 scheduler.addTrack(track);
-                lastUsedTextChannel.get()
-                        .sendMessage(new InfoMessage("Queued track: ", track.getInfo().author + " - " + track.getInfo().title + " (" + toTimeDuration(track.getInfo().length) + ")").template())
-                        .queue();
+                messageSendService.sendQueuedTrack(
+                        lastUsedTextChannel.get(),
+                        (track.getInfo().author + " - " + track.getInfo().title + " (" + toTimeDuration(track.getInfo().length) + ")"),
+                        isPaused());
             }
         }
 

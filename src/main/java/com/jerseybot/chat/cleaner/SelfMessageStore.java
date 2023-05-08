@@ -10,19 +10,20 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 @Component
-public class SelfMessagesCleaner {
+public class SelfMessageStore {
     private final JDA jda;
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Map<Long, Map<MessageType, FreshLimitedQueue<Long>>> messages = new HashMap<>();
 
     @Autowired
-    public SelfMessagesCleaner(JDAService jdaService) {
+    public SelfMessageStore(JDAService jdaService) {
         this.jda = jdaService.getJda();
     }
 
