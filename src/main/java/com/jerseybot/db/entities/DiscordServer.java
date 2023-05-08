@@ -5,8 +5,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -15,11 +17,13 @@ public class DiscordServer {
     @Id
     private Long discordServerId;
 
-    @Column(nullable = false)
-    private Integer languageId;
+    @Getter@Setter
+    @Column(nullable = false, length = 2)
+    private String countryCode;
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
-    @JoinColumn(name = "server_settings_id")
+    @Getter
+    @PrimaryKeyJoinColumn
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private DiscordServerSettings settings;
 
@@ -29,10 +33,10 @@ public class DiscordServer {
 //    @MapKey(name = "name")
 //    private Map<String, PlayList> playLists = new HashMap<>();
 
-    public DiscordServer(long discordServerId, int languageId, DiscordServerSettings settings) {
+    public DiscordServer(long discordServerId) {
         this.discordServerId = discordServerId;
-        this.languageId = languageId;
-        this.settings = settings;
+        this.countryCode = "RU";
+        this.settings = new DiscordServerSettings(discordServerId, (byte) 100, "$");
     }
 
     public DiscordServer() {}

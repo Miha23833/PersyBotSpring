@@ -26,7 +26,7 @@ public class TextCommandExecutionContext {
                 .replaceFirst("(?i)" + Pattern.quote(prefix), "")
                 .split("\\s+");
 
-        this.command = split[0];
+        this.command = split[0].toLowerCase();
 
 
         this.args = Arrays.asList(split).subList(1, split.length);

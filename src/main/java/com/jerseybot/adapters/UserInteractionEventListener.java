@@ -7,6 +7,9 @@ import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.TextCommandRouter;
 import com.jerseybot.command.button.ButtonCommandContext;
 import com.jerseybot.command.text.TextCommandExecutionContext;
+import com.jerseybot.db.entities.DiscordServer;
+import com.jerseybot.db.repositories.DiscordServerRepository;
+import jakarta.transaction.Transactional;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -20,32 +23,34 @@ public class UserInteractionEventListener extends ListenerAdapter {
     private final TextCommandRouter textCommandRouter;
     private final ButtonCommandRouter buttonCommandRouter;
     private final MessageSendService messageSendService;
-
-    // TODO: move to db and keep dynamically
-    private final String prefix = "$";
+    private final DiscordServerRepository discordServerRepository;
 
     @Autowired
     public UserInteractionEventListener(TextCommandRouter textCommandRouter,
                                         ButtonCommandRouter buttonCommandRouter,
                                         MessageSendService messageSendService,
-                                        JDAService jdaService) {
+                                        JDAService jdaService, DiscordServerRepository discordServerRepository) {
         this.textCommandRouter = textCommandRouter;
         this.buttonCommandRouter = buttonCommandRouter;
         this.messageSendService = messageSendService;
+        this.discordServerRepository = discordServerRepository;
 
         jdaService.getJda().addEventListener(this);
     }
 
-
     @Override
+    @Transactional
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        if (event.getMessage().getAuthor().isBot() ||
-                !event.getMessage().getContentRaw().startsWith(prefix) ||
-                !event.getMessage().getChannel().asTextChannel().canTalk()) {
+        if (event.getMessage().getAuthor().isBot() || !event.getMessage().getChannel().asTextChannel().canTalk()) {
             return;
         }
+        long guildId = event.getGuild().getIdLong();
+        DiscordServer discordServer = discordServerRepository.getOrCreateDefault(guildId);
+
         CommandExecutionRsp rsp = new CommandExecutionRsp();
-        textCommandRouter.route(new TextCommandExecutionContext(event, prefix), rsp);
+        if (event.getMessage().getContentRaw().startsWith(discordServer.getSettings().getPrefix())) {
+            textCommandRouter.route(new TextCommandExecutionContext(event, discordServer.getSettings().getPrefix()), rsp);
+        }
 
         if (rsp.getMessage() != null) {
             messageSendService.sendErrorMessage(event.getMessage().getChannel().asTextChannel(), rsp.getMessage());

@@ -46,12 +46,10 @@ public class TextCommandRouter {
 
     public void route(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         try {
-            String command = context.getCommand().toLowerCase();
+            String command = context.getCommand();
             if (textCommandRoutes.containsKey(command)) {
                 AbstractTextCommand textCommand = textCommandRoutes.get(command);
-                    textCommand.execute(context, rsp);
-                } else {
-                rsp.setMessage(context.getCommand() + " is not my command.");
+                textCommand.execute(context, rsp);
             }
         } catch (Throwable e) {
             rsp.setException(e);
