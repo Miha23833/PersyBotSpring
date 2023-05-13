@@ -14,61 +14,33 @@ import java.util.stream.Collectors;
 
 @Component
 public class TrackScheduler {
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-
     private final Queue<AudioTrack> tracks = new LinkedBlockingQueue<>();
 
-    public void addTrack(AudioTrack track){
-        try {
-            rwLock.writeLock().lock();
-            this.tracks.add(track);
-        } finally {
-            rwLock.writeLock().unlock();
-        }
+    public void addTrack(AudioTrack track) {
+        this.tracks.add(track);
     }
 
-    public AudioTrack nextTrack(){
-        try {
-            rwLock.writeLock().lock();
+    public AudioTrack nextTrack() {
         return tracks.remove();
-        } finally {
-            rwLock.writeLock().unlock();
-        }
     }
 
-    public void clear(){
-
+    public void clear() {
+        this.tracks.clear();
     }
 
     public boolean isEmpty() {
-        try {
-            rwLock.readLock().lock();
         return tracks.isEmpty();
-        } finally {
-            rwLock.readLock().unlock();
-        }
     }
 
     public List<AudioTrack> getTracks() {
-        try {
-            rwLock.readLock().lock();
         return tracks.stream().map(AudioTrack::makeClone).collect(Collectors.toList());
-        } finally {
-            rwLock.readLock().unlock();
-        }
     }
 
     public void shuffle() {
-        try {
-            rwLock.writeLock().lock();
-
-            List<AudioTrack> trackQueue = new ArrayList<>(this.tracks);
-            this.tracks.clear();
-            Collections.shuffle(trackQueue);
-            this.tracks.addAll(trackQueue);
-        } finally {
-            rwLock.writeLock().unlock();
-        }
+        List<AudioTrack> trackQueue = new ArrayList<>(this.tracks);
+        this.tracks.clear();
+        Collections.shuffle(trackQueue);
+        this.tracks.addAll(trackQueue);
     }
 
 }
