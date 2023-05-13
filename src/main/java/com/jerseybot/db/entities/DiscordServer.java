@@ -9,10 +9,15 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.cache.annotation.Cacheable;
 
 @Entity
+@Cacheable("DiscordServer")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class DiscordServer {
     @Id
     private Long discordServerId;

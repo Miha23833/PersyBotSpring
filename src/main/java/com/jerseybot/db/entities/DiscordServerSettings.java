@@ -5,9 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.jetbrains.annotations.Range;
+import org.springframework.cache.annotation.Cacheable;
 
 @Entity
+@Cacheable("DiscordServer.DiscordServerSettings")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class DiscordServerSettings {
     public static final int PREFIX_MAX_LEN = 2;
     @Id
