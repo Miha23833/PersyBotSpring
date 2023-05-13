@@ -83,6 +83,10 @@ public class Player {
         return this.scheduler.getTracks();
     }
 
+    public void mixQueue() {
+        this.scheduler.shuffle();
+    }
+
     private class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler {
         private final String source;
 
