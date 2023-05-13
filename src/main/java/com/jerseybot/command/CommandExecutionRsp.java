@@ -11,4 +11,8 @@ public class CommandExecutionRsp {
     @Getter
     @Setter
     private Throwable exception;
+
+    public boolean isOk() {
+        return message == null && exception == null;
+    }
 }

@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static org.springframework.core.io.support.ResourcePatternUtils.isUrl;
-
 @Component
 public class PlayMusicTextCommand extends AbstractTextCommand {
     private final PlayerRepository playerRepository;
@@ -30,9 +28,12 @@ public class PlayMusicTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected boolean runBefore(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
-        validateArgs(context);
+    protected boolean validateArgs(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
+        return rsp.isOk();
+    }
 
+    @Override
+    protected boolean runBefore(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         Member requestingMember = context.getEvent().getMember();
         if (requestingMember == null) {
             return false;
@@ -88,17 +89,5 @@ public class PlayMusicTextCommand extends AbstractTextCommand {
     @Override
     public String getDescription() {
         return "Command to play music. To use write '''<prefix>play <link or name of sound>'''";
-    }
-
-    @Override
-    protected void validateArgs(TextCommandExecutionContext context) {
-//        if (!hasMinimumArgs(context.getArgs())){
-//            BotUtils.sendMessage(getDescription(), context.getTextChannel());
-//        }
-
-//        String link = String.join(" ", args);
-//        if (isUrl(link) && !isPlayableLink(link)) {
-//            validationResult.setInvalid(TEXT_COMMAND_REJECT_REASON.WRONG_VALUE, "I cannot play this url");
-//        }
     }
 }

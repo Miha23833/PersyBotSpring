@@ -112,6 +112,10 @@ public class Player {
                 for (AudioTrack track : playlist.getTracks()) {
                     scheduler.addTrack(track);
                 }
+                if (!isPlaying()) {
+                    resume();
+                    audioPlayer.playTrack(scheduler.nextTrack());
+                }
             }
         }
 

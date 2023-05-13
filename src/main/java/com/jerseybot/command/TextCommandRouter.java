@@ -1,7 +1,9 @@
 package com.jerseybot.command;
 
+import com.jerseybot.chat.MessageSendService;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
+import com.jerseybot.command.text.impl.ChangePrefixTextCommand;
 import com.jerseybot.command.text.impl.JoinToVoiceChannelTextCommand;
 import com.jerseybot.command.text.impl.LeaveVoiceChannelTextCommand;
 import com.jerseybot.command.text.impl.PauseMusicTextCommand;
@@ -21,15 +23,22 @@ import java.util.Map;
 public class TextCommandRouter {
     private final Map<String, AbstractTextCommand> textCommandRoutes;
 
+    private final MessageSendService messageSendService;
+
     @Autowired
-    public TextCommandRouter(PlayMusicTextCommand playMusicTextCommand,
+    public TextCommandRouter(MessageSendService messageSendService,
+
+                             PlayMusicTextCommand playMusicTextCommand,
                              StopMusicTextCommand stopMusicTextCommand,
                              ResumeMusicTextCommand resumeMusicTextCommand,
                              PauseMusicTextCommand pauseMusicTextCommand,
                              JoinToVoiceChannelTextCommand joinToVoiceChannelTextCommand,
                              LeaveVoiceChannelTextCommand leaveVoiceChannelTextCommand,
                              SkipMusicTextCommand skipMusicTextCommand,
-                             ShowQueueTextCommand showQueueTextCommand) {
+                             ShowQueueTextCommand showQueueTextCommand,
+                             ChangePrefixTextCommand changePrefixTextCommand) {
+        this.messageSendService = messageSendService;
+
         Map<String, AbstractTextCommand> routes = new HashMap<>();
 
         registerRoutes(routes, playMusicTextCommand, "play", "p");
@@ -40,6 +49,7 @@ public class TextCommandRouter {
         registerRoutes(routes, leaveVoiceChannelTextCommand, "leave", "l");
         registerRoutes(routes, skipMusicTextCommand, "skip");
         registerRoutes(routes, showQueueTextCommand, "queue");
+        registerRoutes(routes, changePrefixTextCommand, "prefix");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }

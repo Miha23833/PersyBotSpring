@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Range;
 
 @Entity
 public class DiscordServerSettings {
+    public static final int PREFIX_MAX_LEN = 2;
     @Id
     private Long discordServerId;
 
@@ -18,7 +19,7 @@ public class DiscordServerSettings {
     private byte volume;
 
     @Getter@Setter
-    @Column(nullable = false, length = 2)
+    @Column(nullable = false, length = PREFIX_MAX_LEN)
     private String prefix;
 
 //    @Getter

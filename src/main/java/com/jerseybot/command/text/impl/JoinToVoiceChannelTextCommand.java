@@ -24,14 +24,12 @@ public class JoinToVoiceChannelTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected void validateArgs(TextCommandExecutionContext context) {
-
+    protected boolean validateArgs(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
+        return rsp.isOk();
     }
 
     @Override
     protected boolean runBefore(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
-        validateArgs(context);
-
         Member requestingMember = context.getEvent().getMember();
         if (requestingMember == null) {
             return false;

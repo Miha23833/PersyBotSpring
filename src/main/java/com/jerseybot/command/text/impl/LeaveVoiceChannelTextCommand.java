@@ -18,7 +18,8 @@ public class LeaveVoiceChannelTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected void validateArgs(TextCommandExecutionContext context) {
+    protected boolean validateArgs(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
+        return rsp.isOk();
     }
 
     @Override

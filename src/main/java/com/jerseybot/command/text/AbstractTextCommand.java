@@ -9,11 +9,12 @@ import java.util.function.BiFunction;
 public abstract class AbstractTextCommand {
     private final List<BiFunction<TextCommandExecutionContext, CommandExecutionRsp, Boolean>> executingSequence;
 
-    protected abstract void validateArgs(TextCommandExecutionContext context);
+    protected abstract boolean validateArgs(TextCommandExecutionContext context, CommandExecutionRsp rsp);
     protected abstract boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp);
 
     protected AbstractTextCommand() {
         this.executingSequence = Arrays.asList(
+                this::validateArgs,
                 this::runBefore,
                 this::runCommand,
                 this::runAfter);
