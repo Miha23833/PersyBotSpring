@@ -9,44 +9,48 @@ import com.jerseybot.db.entities.Playlist;
 import com.jerseybot.db.entities.PlaylistId;
 import com.jerseybot.db.repositories.DiscordServerRepository;
 import com.jerseybot.db.repositories.PlayListRepository;
-import org.apache.commons.validator.routines.UrlValidator;
+import com.jerseybot.music.PlayerRepository;
+import com.jerseybot.utils.ActionHelper;
+import com.jerseybot.utils.BotUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
-public class AddPlaylistTextCommand extends AbstractTextCommand {
+public class PlayPlaylistTextCommand extends AbstractTextCommand {
     private final DiscordServerRepository discordServerRepository;
     private final PlayListRepository playListRepository;
-    private final MessageSendService messageSendService;
+    private final ActionHelper actionHelper;
 
-    public AddPlaylistTextCommand(DiscordServerRepository discordServerRepository, PlayListRepository playListRepository, MessageSendService messageSendService) {
+    public PlayPlaylistTextCommand(DiscordServerRepository discordServerRepository, PlayListRepository playListRepository, ActionHelper actionHelper) {
+        this.actionHelper = actionHelper;
         this.discordServerRepository = discordServerRepository;
         this.playListRepository = playListRepository;
-        this.messageSendService = messageSendService;
     }
 
     @Override
     protected boolean validateArgs(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
-        if (context.getArgs().size() < 2) {
-            rsp.setMessage("Need arguments: {playlist name} {url}");
-        }
-        String firstArg = context.getArgs().get(0);
-        String secondArg = context.getArgs().get(1);
-
-        if (firstArg.length() > PlaylistId.MAX_PLAYLIST_NAME_LENGTH) {
-            rsp.setMessage("Max playlist name length is " + PlaylistId.MAX_PLAYLIST_NAME_LENGTH);
-        }
-        if (!UrlValidator.getInstance().isValid(secondArg)) {
-            rsp.setMessage(secondArg + " must be a url");
+        if (context.getArgs().isEmpty()) {
+            rsp.setMessage("Please specify playlist name");
         }
         return rsp.isOk();
     }
 
     @Override
+    protected boolean runBefore(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
+        return BotUtils.canBotJoinAndSpeak(context, rsp);
+    }
+
+    @Override
     protected boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         DiscordServer discordServer = discordServerRepository.findById(context.getGuildId()).orElseThrow();
-        playListRepository.save(new Playlist(discordServer, context.getArgs().get(0), context.getArgs().get(1)));
-        messageSendService.sendInfoMessage(context.getTextChannel(), "Playlist " + context.getArgs().get(0) + " saved.");
-        return true;
+        Optional<Playlist> playlist = playListRepository.findById(new PlaylistId(context.getArgs().get(0), discordServer));
+        if (playlist.isEmpty()) {
+            rsp.setMessage("Playlist with name '" +context.getArgs().get(0) + "' does not exist.");
+            return false;
+        }
+        actionHelper.joinAndPlay(context, playlist.get().getUrl());
+        return rsp.isOk();
     }
 
     @Override

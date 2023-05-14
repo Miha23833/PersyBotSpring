@@ -1,12 +1,13 @@
 package com.jerseybot.utils;
 
+import com.jerseybot.command.CommandExecutionRsp;
+import com.jerseybot.command.text.TextCommandExecutionContext;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -44,22 +45,40 @@ public interface BotUtils {
         return selfMember.hasPermission(Permission.MESSAGE_SEND) && targetChannel.canTalk();
     }
 
-//    static void sendPageableMessage(PageableMessage.Builder message, TextChannel channel, PAGEABLE_MESSAGE_TYPE type) {
-//        sendPageableMessage(
-//                message,
-//                channel,
-//                type,
-//                ServiceAggregator.getInstance().get(CacheService.class).get(PageableMessageCache.class));
-//    }
-//
-//    static void sendPageableMessage(PageableMessage.Builder message, TextChannel channel, PAGEABLE_MESSAGE_TYPE type, PageableMessageCache cache) {
-//        if (message.size() == 1) {
-//            sendMessage(new PagingMessage(message.get(0), false, false).template(), channel);
-//        } else {
-//            channel.sendMessage(new PagingMessage(message.get(0), false, true).template())
-//                    .queue(success -> cache.add(success.getChannel().getIdLong(), PAGEABLE_MESSAGE_TYPE.PLAYLISTS, message.build(success.getIdLong())));
-//        }
-//    }
+    static boolean canBotJoinAndSpeak(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
+        Member requestingMember = context.getEvent().getMember();
+        if (requestingMember == null) {
+            rsp.setMessage("Please join to a voice channel first");
+            return false;
+        }
+        GuildVoiceState guildVoiceState = requestingMember.getVoiceState();
+        if (guildVoiceState == null) {
+            rsp.setMessage("Please join to a voice channel first");
+            return false;
+        }
+        AudioChannelUnion voiceChannel = guildVoiceState.getChannel();
+        if (voiceChannel == null) {
+            rsp.setMessage("Please join to a voice channel first");
+            return false;
+        }
+
+        if (!BotUtils.isMemberInVoiceChannel(requestingMember)) {
+            rsp.setMessage("Please join to a voice channel first");
+            return false;
+        }
+
+        if (!BotUtils.isMemberInVoiceChannel(context.getGuild().getSelfMember(), voiceChannel.asVoiceChannel())
+                && !BotUtils.canJoin(requestingMember, voiceChannel.asVoiceChannel())) {
+            rsp.setMessage("I cannot connect to your voice channel");
+            return false;
+        }
+
+        if (!BotUtils.canSpeak(context.getGuild().getSelfMember())) {
+            rsp.setMessage("I cannot speak in your voice channel");
+            return false;
+        }
+        return true;
+    }
 
     static String toHypertext(String text, String link) {
         return "[" + text + "]" + "(" + link + ")";

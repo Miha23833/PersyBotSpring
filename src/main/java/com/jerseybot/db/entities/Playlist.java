@@ -17,22 +17,15 @@ import org.springframework.cache.annotation.Cacheable;
 @Cacheable("DiscordServer.DiscordServerSettings")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Playlist {
-    public static final int MAX_PLAYLIST_NAME_LENGTH = 16;
-
     @EmbeddedId
     private PlaylistId playlistId;
-
-    @Column(nullable = false, length = MAX_PLAYLIST_NAME_LENGTH)
-    @Getter@Setter
-    private String name;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     @Getter@Setter
     private String url;
 
     public Playlist(DiscordServer discordServer, String name, String url) {
-        this.playlistId = new PlaylistId(discordServer);
-        this.name = name;
+        this.playlistId = new PlaylistId(name, discordServer);
         this.url = url;
     }
 
