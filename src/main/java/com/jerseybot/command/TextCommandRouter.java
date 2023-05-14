@@ -3,6 +3,7 @@ package com.jerseybot.command;
 import com.jerseybot.chat.MessageSendService;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
+import com.jerseybot.command.text.impl.AddPlaylistTextCommand;
 import com.jerseybot.command.text.impl.ChangePrefixTextCommand;
 import com.jerseybot.command.text.impl.JoinToVoiceChannelTextCommand;
 import com.jerseybot.command.text.impl.LeaveVoiceChannelTextCommand;
@@ -38,7 +39,8 @@ public class TextCommandRouter {
                              SkipMusicTextCommand skipMusicTextCommand,
                              ShowQueueTextCommand showQueueTextCommand,
                              ChangePrefixTextCommand changePrefixTextCommand,
-                             MixTrackQueueTextCommand mixTrackQueueTextCommand) {
+                             MixTrackQueueTextCommand mixTrackQueueTextCommand,
+                             AddPlaylistTextCommand addPlaylistTextCommand) {
         this.messageSendService = messageSendService;
 
         Map<String, AbstractTextCommand> routes = new HashMap<>();
@@ -53,6 +55,7 @@ public class TextCommandRouter {
         registerRoutes(routes, showQueueTextCommand, "queue");
         registerRoutes(routes, changePrefixTextCommand, "prefix");
         registerRoutes(routes, mixTrackQueueTextCommand, "mix");
+        registerRoutes(routes, addPlaylistTextCommand, "addplaylist", "padd");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }
