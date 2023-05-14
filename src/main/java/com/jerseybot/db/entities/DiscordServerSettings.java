@@ -12,7 +12,7 @@ import org.springframework.cache.annotation.Cacheable;
 
 @Entity
 @Cacheable("DiscordServer.DiscordServerSettings")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "DiscordServerSettings")
 public class DiscordServerSettings {
     public static final int PREFIX_MAX_LEN = 2;
     @Id

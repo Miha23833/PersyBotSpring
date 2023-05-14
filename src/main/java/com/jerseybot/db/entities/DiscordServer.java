@@ -17,7 +17,7 @@ import org.springframework.cache.annotation.Cacheable;
 
 @Entity
 @Cacheable("DiscordServer")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "DiscordServer")
 public class DiscordServer {
     @Id
     private Long discordServerId;

@@ -14,8 +14,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.cache.annotation.Cacheable;
 
 @Entity
-@Cacheable("DiscordServer.DiscordServerSettings")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cacheable("Playlist")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "Playlist")
 public class Playlist {
     @EmbeddedId
     private PlaylistId playlistId;
