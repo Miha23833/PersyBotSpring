@@ -1,6 +1,6 @@
 package com.jerseybot.chat.cleaner;
 
-import com.jerseybot.JDAService;
+import com.jerseybot.JDAStorage;
 import com.jerseybot.utils.collections.FreshLimitedQueue;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -10,21 +10,20 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 @Component
 public class SelfMessageStore {
-    private final JDA jda;
+    private final JDAStorage jdaStorage;
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final Map<Long, Map<MessageType, FreshLimitedQueue<Long>>> messages = new HashMap<>();
 
     @Autowired
-    public SelfMessageStore(JDAService jdaService) {
-        this.jda = jdaService.getJda();
+    public SelfMessageStore(JDAStorage jdaStorage) {
+        this.jdaStorage = jdaStorage;
     }
 
     public void addMessage(MessageType messageType, Long textChannelId, Long msgId) {
@@ -34,7 +33,7 @@ public class SelfMessageStore {
             messageQueue.add(msgId);
             if (!messageQueue.isOldEmpty()) {
                 List<Long> messagesToRemove = messageQueue.clearOld();
-                TextChannel channel = this.jda.getTextChannelById(textChannelId);
+                TextChannel channel = this.jdaStorage.getJda().getTextChannelById(textChannelId);
                 if (channel == null) {
                     this.messages.remove(textChannelId);
                     return;

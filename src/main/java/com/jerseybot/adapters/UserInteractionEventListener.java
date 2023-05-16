@@ -1,6 +1,5 @@
 package com.jerseybot.adapters;
 
-import com.jerseybot.JDAService;
 import com.jerseybot.chat.MessageSendService;
 import com.jerseybot.command.ButtonCommandRouter;
 import com.jerseybot.command.CommandExecutionRsp;
@@ -27,14 +26,11 @@ public class UserInteractionEventListener extends ListenerAdapter {
     @Autowired
     public UserInteractionEventListener(TextCommandRouter textCommandRouter,
                                         ButtonCommandRouter buttonCommandRouter,
-                                        MessageSendService messageSendService,
-                                        JDAService jdaService, DiscordServerRepository discordServerRepository) {
+                                        MessageSendService messageSendService, DiscordServerRepository discordServerRepository) {
         this.textCommandRouter = textCommandRouter;
         this.buttonCommandRouter = buttonCommandRouter;
         this.messageSendService = messageSendService;
         this.discordServerRepository = discordServerRepository;
-
-        jdaService.getJda().addEventListener(this);
     }
 
     @Override

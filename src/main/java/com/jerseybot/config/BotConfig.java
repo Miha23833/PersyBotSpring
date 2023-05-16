@@ -16,5 +16,13 @@ public class BotConfig {
     @Value("${chat.defaultPrefix}")
     private String defaultPrefix;
 
-
+    @Getter
+    @Value("${performance.player.activityCheckPauseMillis}")
+    private int activityCheckPauseMillis;
+    @Getter
+    @Value("${performance.player.maxInactivityTimeMillisIfNotPlaying}")
+    private int maxInactivityTimeMillisIfNotPlaying;
+    @Getter
+    @Value("${performance.player.maxInactivityTimeMillisIfPaused}")
+    private int maxInactivityTimeIfPaused;
 }
