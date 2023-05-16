@@ -87,6 +87,10 @@ public class Player {
         this.scheduler.shuffle();
     }
 
+    public void setVolume(int volume) {
+        this.audioPlayer.setVolume(volume);
+    }
+
     private class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler {
         private final String source;
 

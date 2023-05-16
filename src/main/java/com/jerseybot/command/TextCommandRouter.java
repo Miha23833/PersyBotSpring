@@ -5,6 +5,7 @@ import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import com.jerseybot.command.text.impl.AddPlaylistTextCommand;
 import com.jerseybot.command.text.impl.ChangePrefixTextCommand;
+import com.jerseybot.command.text.impl.ChangeVolumeTextCommand;
 import com.jerseybot.command.text.impl.JoinToVoiceChannelTextCommand;
 import com.jerseybot.command.text.impl.LeaveVoiceChannelTextCommand;
 import com.jerseybot.command.text.impl.MixTrackQueueTextCommand;
@@ -25,13 +26,8 @@ import java.util.Map;
 @Component
 public class TextCommandRouter {
     private final Map<String, AbstractTextCommand> textCommandRoutes;
-
-    private final MessageSendService messageSendService;
-
     @Autowired
-    public TextCommandRouter(MessageSendService messageSendService,
-
-                             PlayMusicTextCommand playMusicTextCommand,
+    public TextCommandRouter(PlayMusicTextCommand playMusicTextCommand,
                              StopMusicTextCommand stopMusicTextCommand,
                              ResumeMusicTextCommand resumeMusicTextCommand,
                              PauseMusicTextCommand pauseMusicTextCommand,
@@ -42,9 +38,8 @@ public class TextCommandRouter {
                              ChangePrefixTextCommand changePrefixTextCommand,
                              MixTrackQueueTextCommand mixTrackQueueTextCommand,
                              AddPlaylistTextCommand addPlaylistTextCommand,
-                             PlayPlaylistTextCommand playPlaylistTextCommand) {
-        this.messageSendService = messageSendService;
-
+                             PlayPlaylistTextCommand playPlaylistTextCommand,
+                             ChangeVolumeTextCommand changeVolumeTextCommand) {
         Map<String, AbstractTextCommand> routes = new HashMap<>();
 
         registerRoutes(routes, playMusicTextCommand, "play", "p");
@@ -59,6 +54,7 @@ public class TextCommandRouter {
         registerRoutes(routes, mixTrackQueueTextCommand, "mix");
         registerRoutes(routes, addPlaylistTextCommand, "addplaylist", "padd");
         registerRoutes(routes, playPlaylistTextCommand, "playlist", "pplay", "plist");
+        registerRoutes(routes, changeVolumeTextCommand, "volume", "v");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }

@@ -20,8 +20,8 @@ public class DiscordServerSettings {
 
     @Getter@Setter
     @Column(nullable = false)
-    @Range(from = 0, to = 100)
-    private byte volume;
+    @Range(from = 0, to = 1000)
+    private int volume;
 
     @Getter@Setter
     @Column(nullable = false, length = PREFIX_MAX_LEN)
@@ -36,7 +36,7 @@ public class DiscordServerSettings {
 //    @OnDelete(action = OnDeleteAction.NO_ACTION)
 //    private EqualizerPreset preset;
 
-    DiscordServerSettings(long discordServerId, byte volume, String prefix) {
+    DiscordServerSettings(long discordServerId, int volume, String prefix) {
         this.discordServerId = discordServerId;
         this.volume = volume;
         this.prefix = prefix;

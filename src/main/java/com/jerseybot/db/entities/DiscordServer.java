@@ -41,7 +41,7 @@ public class DiscordServer {
     public DiscordServer(long discordServerId) {
         this.discordServerId = discordServerId;
         this.countryCode = "RU";
-        this.settings = new DiscordServerSettings(discordServerId, (byte) 100, "$");
+        this.settings = new DiscordServerSettings(discordServerId, 100, "$");
     }
 
     public DiscordServer() {}
