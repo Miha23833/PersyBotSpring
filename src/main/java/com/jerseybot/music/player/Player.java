@@ -105,21 +105,23 @@ public class Player {
                 audioPlayer.playTrack(track);
             } else {
                 scheduler.addTrack(track);
-                messageSendService.sendQueuedTrack(
-                        lastUsedTextChannel.get(),
-                        (track.getInfo().author + " - " + track.getInfo().title + " (" + toTimeDuration(track.getInfo().length) + ")"),
-                        isPaused());
+                messageSendService.sendQueuedTrack(lastUsedTextChannel.get(), track, isPaused());
             }
         }
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist) {
-            if (playlist.isSearchResult()) {
+            if (playlist.getTracks().isEmpty()) {
+                messageSendService.sendInfoMessage(lastUsedTextChannel.get(), "Playlist is empty");
+                return;
+            }
+            if (playlist.isSearchResult() || playlist.getTracks().size() == 1) {
                 trackLoaded(playlist.getTracks().get(0));
             } else {
                 for (AudioTrack track : playlist.getTracks()) {
                     scheduler.addTrack(track);
                 }
+                messageSendService.sendQueuedTracks(lastUsedTextChannel.get(), playlist.getTracks());
                 if (!isPlaying()) {
                     resume();
                     audioPlayer.playTrack(scheduler.nextTrack());

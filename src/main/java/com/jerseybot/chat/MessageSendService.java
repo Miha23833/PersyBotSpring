@@ -9,11 +9,14 @@ import com.jerseybot.chat.pagination.PageableMessage;
 import com.jerseybot.chat.pagination.PaginationService;
 import com.jerseybot.command.button.enums.BUTTON_ID;
 import com.jerseybot.command.button.enums.PLAYER_BUTTON;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import jakarta.annotation.Nullable;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.jerseybot.utils.DateTimeUtils.toTimeDuration;
 
 @Service
 public class MessageSendService {
@@ -63,10 +68,9 @@ public class MessageSendService {
         }
     }
 
-    public void sendQueuedTrack(TextChannel textChannel, String title, boolean isPlayerPaused) {
+    public void sendQueuedTrack(TextChannel textChannel, AudioTrack track, boolean isPlayerPaused) {
         if (textChannel.canTalk()) {
-            textChannel
-                    .sendMessage(new InfoMessage("Queued track: ", title).template())
+            textChannel.sendMessage(new InfoMessage("Queued track: ", getTrackTitle(track)).template())
                     .queue(msg -> updatePlayerButtons(textChannel, isPlayerPaused, false));
         }
     }
@@ -78,6 +82,9 @@ public class MessageSendService {
             channel.sendMessage(new PagingMessage(message.get(0), false, true).template())
                     .queue(success -> paginationService.registerPagination(success.getChannel().getIdLong(), type, message.build(success.getIdLong())));
         }
+    }
+    public void sendMessage(TextChannel textChannel, String title, String content) {
+        sendMessage(textChannel, title, content, null);
     }
 
     public void sendMessage(TextChannel textChannel, String title, String content, @Nullable MessageType messageType) {
@@ -112,6 +119,31 @@ public class MessageSendService {
                                 PLAYER_BUTTON.SKIP.button(isNextTrackAbsent))
                         .queue())
         );
+    }
+
+    public void sendQueuedTracks(TextChannel textChannel, List<AudioTrack> tracks) {
+        sendMessage(textChannel, "Queued tracks:", getQueuedTrackMessage(tracks));
+    }
+
+    private String getQueuedTrackMessage(List<AudioTrack> tracks) {
+        StringBuilder queuedTracksRsp = new StringBuilder();
+
+        int trackInfoRspLineLimit = Math.min(tracks.size(), 10);
+
+        for (int i = 0; i < trackInfoRspLineLimit; i++) {
+            queuedTracksRsp.append(getTrackTitle(tracks.get(i))).append("\n");
+        }
+
+        if (tracks.size() > trackInfoRspLineLimit) {
+            queuedTracksRsp.append('\n');
+            queuedTracksRsp.append("And ")
+                    .append(tracks.size() - trackInfoRspLineLimit).append(" more");
+        }
+        return queuedTracksRsp.toString();
+    }
+
+    private String getTrackTitle(AudioTrack track) {
+        return track.getInfo().author + " - " + track.getInfo().title + " (" + toTimeDuration(track.getInfo().length) + ")";
     }
 
     private boolean containsExactlyButtons(Message message, Set<String> buttonIds) {

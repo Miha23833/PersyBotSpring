@@ -51,6 +51,11 @@ public class VoiceChannelInactivityChecker extends ListenerAdapter {
         if (isSelfMember(event)) {
             if (event.getChannelLeft() != null) {
                 lastActivityByServerId.remove(event.getChannelLeft().getIdLong());
+                event.getChannelLeft().getGuild().getAudioManager().closeAudioConnection();
+                if (playerRepository.hasInitializedPlayer(event.getGuild().getIdLong())) {
+                    Player player = playerRepository.get(event.getGuild().getIdLong());
+                    player.stop();
+                }
             } else if (event.getChannelJoined() != null) {
                 lastActivityByServerId.put(event.getChannelJoined().getIdLong(), System.currentTimeMillis());
             }
@@ -81,7 +86,6 @@ public class VoiceChannelInactivityChecker extends ListenerAdapter {
                 !playerRepository.hasInitializedPlayer(voiceChannel.getGuild().getIdLong()) ||
                 (!player.isPlaying() && currentTime - lastActivityTimeMillis > maxInactivityTimeIfNotPlaying) ||
                 (player.isPaused() && currentTime - lastActivityTimeMillis > maxInactivityTimeIfPaused)) {
-            player.stop();
             voiceChannel.getGuild().getAudioManager().closeAudioConnection();
         }  else if (player.isPlaying() && !player.isPaused()) {
             lastActivityByServerId.put(voiceChannelId, System.currentTimeMillis());
