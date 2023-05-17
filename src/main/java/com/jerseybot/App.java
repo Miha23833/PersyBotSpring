@@ -1,8 +1,6 @@
 package com.jerseybot;
 
 import com.jerseybot.config.BotConfig;
-import lombok.Getter;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -10,17 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @SpringBootApplication
-public class JDAService implements CommandLineRunner {
+public class App implements CommandLineRunner {
 
     @Autowired
-    public JDAService(List<ListenerAdapter> listenerAdapters, BotConfig botConfig) throws InterruptedException {
+    public App(List<ListenerAdapter> listenerAdapters, BotConfig botConfig) throws InterruptedException {
 
         JDABuilder.createDefault(botConfig.getToken())
                 .enableIntents(GatewayIntent.GUILD_MEMBERS,
@@ -46,6 +43,6 @@ public class JDAService implements CommandLineRunner {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(JDAService.class, args);
+        SpringApplication.run(App.class, args);
     }
 }

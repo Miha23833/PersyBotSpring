@@ -8,6 +8,9 @@ import com.jerseybot.command.button.ButtonCommandContext;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import com.jerseybot.db.entities.DiscordServer;
 import com.jerseybot.db.repositories.DiscordServerRepository;
+import com.jerseybot.exception.CommandExecutionException;
+import com.jerseybot.exception.TextCommandExecutionException;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -17,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class UserInteractionEventListener extends ListenerAdapter {
     private final TextCommandRouter textCommandRouter;
     private final ButtonCommandRouter buttonCommandRouter;
@@ -50,7 +54,7 @@ public class UserInteractionEventListener extends ListenerAdapter {
             messageSendService.sendErrorMessage(event.getMessage().getChannel().asTextChannel(), rsp.getMessage());
         }
         if (rsp.getException() != null) {
-            // TODO: log it
+            log.error("Something broke when processing command", new TextCommandExecutionException(rsp.getException(), guildId, event.getChannel().getIdLong(), event.getMessage().getContentRaw()));
         }
     }
 
@@ -60,10 +64,17 @@ public class UserInteractionEventListener extends ListenerAdapter {
             CommandExecutionRsp rsp = new CommandExecutionRsp();
             buttonCommandRouter.route(new ButtonCommandContext(event), rsp);
 
-            if (rsp.getMessage() != null || rsp.getException() != null) {
+            if (!rsp.isOk()) {
                 event.getMessage()
                         .editMessage(MessageEditBuilder.fromMessage(event.getMessage()).setActionRow().build())
                         .queue();
+                if (rsp.getMessage() != null) {
+                    messageSendService.sendErrorMessage(event.getChannel().asTextChannel(), rsp.getMessage());
+                }
+                if (rsp.getException() != null) {
+                    log.error("Something broke when processing command",
+                            new CommandExecutionException(rsp.getException(), event.getGuild() == null ? -1 : event.getGuild().getIdLong(), event.getChannel().getIdLong()));
+                }
             } else if (!event.getInteraction().isAcknowledged()) {
                 event.getInteraction().deferEdit().queue();
             }
