@@ -7,7 +7,7 @@ phases:
   build:
     commands:
       - echo Building project
-      - ./gradlew clean build
+      - ./gradlew clean bootJar
 artifacts:
   files:
     - '**/*'
