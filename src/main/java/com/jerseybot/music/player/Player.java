@@ -12,6 +12,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.jerseybot.utils.DateTimeUtils.toTimeDuration;
 
 @Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Player {
     private final DefaultAudioPlayerManager audioSourceManager;
     private final AudioPlayer audioPlayer;
