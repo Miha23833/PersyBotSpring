@@ -35,6 +35,8 @@ public class Player {
 
     private final AtomicReference<TextChannel> lastUsedTextChannel = new AtomicReference<>();
 
+    private boolean isOnRepeat = false;
+
     @Autowired
     public Player(DefaultAudioPlayerManager manager, MessageSendService messageSendService) {
         this.audioSourceManager = manager;
@@ -54,12 +56,14 @@ public class Player {
             stop();
         } else {
             this.audioPlayer.playTrack(scheduler.nextTrack());
+            this.isOnRepeat = false;
         }
     }
 
     public void stop() {
         this.scheduler.clear();
         this.audioPlayer.stopTrack();
+        this.isOnRepeat = false;
     }
 
     public void pause() {
@@ -88,10 +92,16 @@ public class Player {
 
     public void mixQueue() {
         this.scheduler.shuffle();
+        this.isOnRepeat = false;
     }
 
     public void setVolume(int volume) {
         this.audioPlayer.setVolume(volume);
+    }
+
+    public void repeat() {
+        this.isOnRepeat = true;
+        messageSendService.sendRepeatingTrack(lastUsedTextChannel.get(), this.audioPlayer.getPlayingTrack());
     }
 
     private class AudioLoadResultHandler implements com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler {
@@ -103,7 +113,7 @@ public class Player {
 
         @Override
         public void trackLoaded(AudioTrack track) {
-            if (scheduler.isEmpty() && !isPlaying()) {
+            if (scheduler.isEmpty() && !isPlaying() && !isOnRepeat) {
                 resume();
                 audioPlayer.playTrack(track);
             } else {
@@ -152,7 +162,9 @@ public class Player {
             if (!endReason.mayStartNext) {
                 return;
             }
-            if (endReason.equals(AudioTrackEndReason.LOAD_FAILED) && playTries++ < maxPlayTries) {
+            if (isOnRepeat) {
+                player.playTrack(track.makeClone());
+            } else if (endReason.equals(AudioTrackEndReason.LOAD_FAILED) && playTries++ < maxPlayTries) {
                 player.playTrack(track.makeClone());
             } else if (scheduler.isEmpty()) {
                 player.stopTrack();

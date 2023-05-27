@@ -125,6 +125,10 @@ public class MessageSendService {
         sendMessage(textChannel, "Queued tracks:", getQueuedTrackMessage(tracks));
     }
 
+    public void sendRepeatingTrack(TextChannel textChannel, AudioTrack track) {
+        sendInfoMessage(textChannel, "Repeating: " + getTrackTitle(track));
+    }
+
     private String getQueuedTrackMessage(List<AudioTrack> tracks) {
         StringBuilder queuedTracksRsp = new StringBuilder();
 

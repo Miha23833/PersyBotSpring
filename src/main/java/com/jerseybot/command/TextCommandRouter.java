@@ -12,6 +12,7 @@ import com.jerseybot.command.text.impl.MixTrackQueueTextCommand;
 import com.jerseybot.command.text.impl.PauseMusicTextCommand;
 import com.jerseybot.command.text.impl.PlayMusicTextCommand;
 import com.jerseybot.command.text.impl.PlayPlaylistTextCommand;
+import com.jerseybot.command.text.impl.RepeatMusicTextCommand;
 import com.jerseybot.command.text.impl.ResumeMusicTextCommand;
 import com.jerseybot.command.text.impl.ShowQueueTextCommand;
 import com.jerseybot.command.text.impl.SkipMusicTextCommand;
@@ -39,7 +40,8 @@ public class TextCommandRouter {
                              MixTrackQueueTextCommand mixTrackQueueTextCommand,
                              AddPlaylistTextCommand addPlaylistTextCommand,
                              PlayPlaylistTextCommand playPlaylistTextCommand,
-                             ChangeVolumeTextCommand changeVolumeTextCommand) {
+                             ChangeVolumeTextCommand changeVolumeTextCommand,
+                             RepeatMusicTextCommand repeatMusicTextCommand) {
         Map<String, AbstractTextCommand> routes = new HashMap<>();
 
         registerRoutes(routes, playMusicTextCommand, "play", "p");
@@ -55,6 +57,7 @@ public class TextCommandRouter {
         registerRoutes(routes, addPlaylistTextCommand, "addplaylist", "padd");
         registerRoutes(routes, playPlaylistTextCommand, "playlist", "pplay", "plist");
         registerRoutes(routes, changeVolumeTextCommand, "volume", "v");
+        registerRoutes(routes, repeatMusicTextCommand, "repeat", "roll");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }
