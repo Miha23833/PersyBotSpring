@@ -176,9 +176,9 @@ public class Player {
         @Override
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
             this.playTries = 0;
-            AudioTrackInfo info = track.getInfo();
-            String title = info.author + " - " + info.title + " (" + toTimeDuration(info.length) + ")";
-            messageSendService.sendNowPlaying(lastUsedTextChannel.get(), title, player.isPaused(), scheduler.isEmpty());
+            if (!isOnRepeat) {
+                messageSendService.sendNowPlaying(lastUsedTextChannel.get(), track, player.isPaused(), scheduler.isEmpty());
+            }
         }
 
         @Override
