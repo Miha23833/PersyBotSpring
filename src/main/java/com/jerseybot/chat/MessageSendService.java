@@ -56,10 +56,10 @@ public class MessageSendService {
         sendMessage(textChannel, "Error", content, MessageType.ERROR);
     }
 
-    public void sendNowPlaying(TextChannel textChannel, String title, boolean isPlayerPaused, boolean isNextTrackAbsent) {
+    public void sendNowPlaying(TextChannel textChannel, AudioTrack track, boolean isPlayerPaused, boolean isNextTrackAbsent) {
         if (textChannel.canTalk()) {
             textChannel
-                    .sendMessage(new InfoMessage("Now playing:", title).template())
+                    .sendMessage(new InfoMessage("Now playing:", getTrackTitle(track)).template())
                     .setActionRow(
                             PLAYER_BUTTON.STOP.button(),
                             isPlayerPaused ? PLAYER_BUTTON.RESUME.button() : PLAYER_BUTTON.PAUSE.button(),
