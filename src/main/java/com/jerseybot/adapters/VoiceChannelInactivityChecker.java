@@ -5,8 +5,8 @@ import com.jerseybot.config.BotConfig;
 import com.jerseybot.music.PlayerRepository;
 import com.jerseybot.music.player.Player;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -14,7 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,11 +34,11 @@ public class VoiceChannelInactivityChecker extends ListenerAdapter {
     private final long maxInactivityTimeIfPaused;
     private final long checkPauseMillis;
 
-    private final Map<Long, Long> lastActivityByServerId;
+    private final Map<Long, Long> lastActivityByVoiceChannelId;
 
     @Autowired
     public VoiceChannelInactivityChecker(BotConfig config, PlayerRepository playerRepository, JDAStorage jdaStorage) {
-        this.lastActivityByServerId = new ConcurrentHashMap<>();
+        this.lastActivityByVoiceChannelId = new ConcurrentHashMap<>();
 
         this.checkPauseMillis = config.getActivityCheckPauseMillis();
         this.maxInactivityTimeIfNotPlaying = config.getMaxInactivityTimeMillisIfNotPlaying();
@@ -50,14 +53,14 @@ public class VoiceChannelInactivityChecker extends ListenerAdapter {
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent event) {
         if (isSelfMember(event)) {
             if (event.getChannelLeft() != null) {
-                lastActivityByServerId.remove(event.getChannelLeft().getIdLong());
+                lastActivityByVoiceChannelId.remove(event.getChannelLeft().getIdLong());
                 event.getChannelLeft().getGuild().getAudioManager().closeAudioConnection();
                 if (playerRepository.hasInitializedPlayer(event.getGuild().getIdLong())) {
                     Player player = playerRepository.get(event.getGuild().getIdLong());
                     player.stop();
                 }
             } else if (event.getChannelJoined() != null) {
-                lastActivityByServerId.put(event.getChannelJoined().getIdLong(), System.currentTimeMillis());
+                lastActivityByVoiceChannelId.put(event.getChannelJoined().getIdLong(), System.currentTimeMillis());
             }
         }
     }
@@ -65,7 +68,7 @@ public class VoiceChannelInactivityChecker extends ListenerAdapter {
     @Override
     public void onStatusChange(@NotNull StatusChangeEvent event) {
         if (event.getNewStatus().equals(JDA.Status.CONNECTED)) {
-            this.executorService.scheduleWithFixedDelay(() -> lastActivityByServerId.forEach(this::leaveVoiceChannelIfInactive), 0, checkPauseMillis, TimeUnit.MILLISECONDS);
+            this.executorService.scheduleWithFixedDelay(() -> lastActivityByVoiceChannelId.forEach(this::updateVoiceChannelLastActivityAndLeaveIfInactive), 0, checkPauseMillis, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -73,22 +76,57 @@ public class VoiceChannelInactivityChecker extends ListenerAdapter {
         return event.getGuild().getSelfMember().getIdLong() == event.getMember().getIdLong();
     }
 
-    private void leaveVoiceChannelIfInactive(long voiceChannelId, long lastActivityTimeMillis) {
+    private void updateVoiceChannelLastActivityAndLeaveIfInactive(long voiceChannelId, long lastActivityTimeMillis) {
+        long currentTime = System.currentTimeMillis();
         VoiceChannel voiceChannel = jdaStorage.getJda().getVoiceChannelById(voiceChannelId);
         if (voiceChannel == null) {
             return;
         }
-        long currentTime = System.currentTimeMillis();
-        Player player = playerRepository.get(voiceChannel.getGuild().getIdLong());
+        Member selfMember = Objects.requireNonNull(jdaStorage.getJda().getGuildById(voiceChannel.getGuild().getIdLong())).getSelfMember();
+        if (!isBotConnectedToVoiceChannel(voiceChannel, selfMember)) {
+            return;
+        }
+        if (!isAnyRealUserConnectedToVoiceChannel(voiceChannel)) {
+            leaveVoiceChannel(voiceChannelId);
+        }
 
-        AudioChannelUnion connectedChannel = voiceChannel.getGuild().getAudioManager().getConnectedChannel();
-        if (connectedChannel == null ||
-                !playerRepository.hasInitializedPlayer(voiceChannel.getGuild().getIdLong()) ||
-                (!player.isPlaying() && currentTime - lastActivityTimeMillis > maxInactivityTimeIfNotPlaying) ||
-                (player.isPaused() && currentTime - lastActivityTimeMillis > maxInactivityTimeIfPaused)) {
-            voiceChannel.getGuild().getAudioManager().closeAudioConnection();
-        }  else if (player.isPlaying() && !player.isPaused()) {
-            lastActivityByServerId.put(voiceChannelId, System.currentTimeMillis());
+        Player player = null;
+        if (playerRepository.hasInitializedPlayer(voiceChannel.getGuild().getIdLong())) {
+            player = playerRepository.get(voiceChannel.getGuild().getIdLong());
+            if (player.isPlaying() && !player.isPaused()) {
+                this.lastActivityByVoiceChannelId.put(voiceChannelId, currentTime);
+            }
+        }
+        if (player == null) {
+            leaveVoiceChannel(voiceChannelId);
+        } else if (player.isPaused()) {
+            if (currentTime - lastActivityTimeMillis > maxInactivityTimeIfPaused) {
+                leaveVoiceChannel(voiceChannelId);
+            }
+        } else if (!player.isPlaying()) {
+            if (currentTime - lastActivityTimeMillis > maxInactivityTimeIfNotPlaying) {
+                leaveVoiceChannel(voiceChannelId);
+            }
+        }
+    }
+
+    private boolean isBotConnectedToVoiceChannel(VoiceChannel voiceChannel, Member selfMember) {
+        if (selfMember.getVoiceState() != null && selfMember.getVoiceState().inAudioChannel() && selfMember.getVoiceState().getChannel() != null) {
+            return selfMember.getVoiceState().getChannel().asVoiceChannel().getIdLong() == voiceChannel.getIdLong();
+        }
+        return false;
+    }
+
+    private boolean isAnyRealUserConnectedToVoiceChannel(VoiceChannel voiceChannel) {
+        List<Member> connectedMembers = voiceChannel.getMembers();
+            return connectedMembers.stream().anyMatch(member -> !member.getUser().isBot());
+    }
+
+    private void leaveVoiceChannel(long voiceChannelId) {
+        VoiceChannel voiceChannel = jdaStorage.getJda().getVoiceChannelById(voiceChannelId);
+        if (voiceChannel != null) {
+            Optional.ofNullable(jdaStorage.getJda().getGuildById(voiceChannel.getGuild().getIdLong()))
+                    .ifPresent(guild -> guild.getAudioManager().closeAudioConnection());
         }
     }
 }
