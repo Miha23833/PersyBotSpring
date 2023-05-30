@@ -36,7 +36,7 @@ public class LazyYoutubeAudioTrackFactory {
             title = title.substring(title.indexOf('\u2014') + 1).trim();
         }
         long durationMillis = Duration.parse(ytVideo.getContentDetails().getDuration()).toMillis();
-        AudioTrackInfo info = new AudioTrackInfo(title, author, durationMillis, ytVideo.getId(), false, "https://www.youtube.com/watch?v=" + ytVideo.getId(), new HashMap<>());
+        AudioTrackInfo info = new AudioTrackInfo(title, author, durationMillis, ytVideo.getId(), false, "https://www.youtube.com/watch?v=" + ytVideo.getId());
         return new LazyYoutubeAudioTrack(info, ytAudioSourceManager, ytSearchProvider);
     }
 
@@ -44,7 +44,7 @@ public class LazyYoutubeAudioTrackFactory {
         String author = Arrays.stream(track.getArtists()).map(ArtistSimplified::getName).collect(Collectors.joining(", "));
         String title = track.getName();
         long durationMillis = track.getDurationMs();
-        AudioTrackInfo info = new AudioTrackInfo(title, author, durationMillis, track.getId(), false, "https://open.spotify.com/track/" + track.getId(), new HashMap<>());
+        AudioTrackInfo info = new AudioTrackInfo(title, author, durationMillis, track.getId(), false, "https://open.spotify.com/track/" + track.getId());
         return new LazyYoutubeAudioTrack(info, ytAudioSourceManager, ytSearchProvider);
     }
 
