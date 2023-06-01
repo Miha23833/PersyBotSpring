@@ -24,6 +24,10 @@ public class Playlist {
     @Getter@Setter
     private String url;
 
+    public String getName() {
+        return playlistId.getName();
+    }
+
     public Playlist(DiscordServer discordServer, String name, String url) {
         this.playlistId = new PlaylistId(name, discordServer);
         this.url = url;
