@@ -38,7 +38,7 @@ public class RepeatMusicTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "If current track finished, play it again. To stop repeating, skip the track.";
     }
 }

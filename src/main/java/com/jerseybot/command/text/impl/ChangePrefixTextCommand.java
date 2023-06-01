@@ -40,7 +40,7 @@ public class ChangePrefixTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Change text command prefix.";
     }
 }

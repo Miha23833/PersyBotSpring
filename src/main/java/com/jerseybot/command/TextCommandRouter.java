@@ -1,6 +1,10 @@
 package com.jerseybot.command;
 
+import com.google.common.collect.Lists;
 import com.jerseybot.chat.MessageSendService;
+import com.jerseybot.chat.message.template.InfoMessage;
+import com.jerseybot.chat.pagination.PAGEABLE_MESSAGE_TYPE;
+import com.jerseybot.chat.pagination.PageableMessage;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import com.jerseybot.command.text.impl.AddPlaylistTextCommand;
@@ -18,18 +22,24 @@ import com.jerseybot.command.text.impl.ShowPlaylistsTextCommand;
 import com.jerseybot.command.text.impl.ShowQueueTextCommand;
 import com.jerseybot.command.text.impl.SkipMusicTextCommand;
 import com.jerseybot.command.text.impl.StopMusicTextCommand;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class TextCommandRouter {
     private final Map<String, AbstractTextCommand> textCommandRoutes;
+    private final MessageSendService messageSendService;
     @Autowired
-    public TextCommandRouter(PlayMusicTextCommand playMusicTextCommand,
+    public TextCommandRouter(MessageSendService messageSendService,
+                             //
+                             PlayMusicTextCommand playMusicTextCommand,
                              StopMusicTextCommand stopMusicTextCommand,
                              ResumeMusicTextCommand resumeMusicTextCommand,
                              PauseMusicTextCommand pauseMusicTextCommand,
@@ -44,6 +54,8 @@ public class TextCommandRouter {
                              ChangeVolumeTextCommand changeVolumeTextCommand,
                              RepeatMusicTextCommand repeatMusicTextCommand,
                              ShowPlaylistsTextCommand showPlaylistsTextCommand) {
+        this.messageSendService = messageSendService;
+
         Map<String, AbstractTextCommand> routes = new HashMap<>();
 
         registerRoutes(routes, playMusicTextCommand, "play", "p");
@@ -68,6 +80,9 @@ public class TextCommandRouter {
     public void route(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         try {
             String command = context.getCommand();
+            if ("help".equals(command) || "h".equals(command)) {
+                showHelp(context.getTextChannel());
+            }
             if (textCommandRoutes.containsKey(command)) {
                 AbstractTextCommand textCommand = textCommandRoutes.get(command);
                 textCommand.execute(context, rsp);
@@ -82,5 +97,26 @@ public class TextCommandRouter {
         for (String mapping: mappings) {
             routes.put(mapping.toLowerCase(), command);
         }
+    }
+
+    private void showHelp(TextChannel textChannel) {
+        Map<AbstractTextCommand, List<String>> commands = new HashMap<>();
+        for (Map.Entry<String, AbstractTextCommand> command : textCommandRoutes.entrySet()) {
+            commands.computeIfAbsent(command.getValue(), k -> new LinkedList<>()).add(command.getKey());
+        }
+        PageableMessage.Builder pageableMessage = PageableMessage.builder();
+        List<String> commandsHelp = new LinkedList<>();
+        for (Map.Entry<AbstractTextCommand, List<String>> abstractTextCommandListEntry : commands.entrySet()) {
+            commandsHelp.add(
+                    String.join(", ", ("**" + abstractTextCommandListEntry.getValue() + "**") + " - " + abstractTextCommandListEntry.getKey().getDescription()) + "\n"
+            );
+        }
+
+        Lists.partition(commandsHelp, 8)
+                .stream()
+                .map(part -> new InfoMessage("Available commands:", String.join("\n ", part)).template())
+                .forEach(pageableMessage::addMessage);
+
+        messageSendService.sendPageableMessage(pageableMessage, textChannel, PAGEABLE_MESSAGE_TYPE.HELP);
     }
 }

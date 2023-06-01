@@ -35,6 +35,6 @@ public class PlayMusicTextCommand extends AbstractTextCommand {
 
     @Override
     public String getDescription() {
-        return "Command to play music. To use write '''<prefix>play <link or name of sound>'''";
+        return "Play music. Add url or name of track after command.";
     }
 }

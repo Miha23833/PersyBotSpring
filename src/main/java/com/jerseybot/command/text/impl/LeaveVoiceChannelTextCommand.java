@@ -47,7 +47,7 @@ public class LeaveVoiceChannelTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Leave voice channel.";
     }
 }

@@ -43,7 +43,7 @@ public class MixTrackQueueTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Shuffle player's track queue.";
     }
 }

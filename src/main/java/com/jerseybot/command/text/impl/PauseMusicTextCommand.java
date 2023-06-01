@@ -28,10 +28,7 @@ public class PauseMusicTextCommand extends AbstractTextCommand {
             return false;
         }
         Player player = playerRepository.get(context.getGuildId());
-        if (!player.isPlaying() || player.isPaused()) {
-            return false;
-        }
-        return true;
+        return player.isPlaying() && !player.isPaused();
     }
 
     @Override
@@ -43,7 +40,7 @@ public class PauseMusicTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Pause player";
     }
 }

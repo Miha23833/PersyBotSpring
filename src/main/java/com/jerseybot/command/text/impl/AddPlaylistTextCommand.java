@@ -50,7 +50,7 @@ public class AddPlaylistTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Add playlist by name. Use: {command} {playlist name} {url}.";
     }
 }

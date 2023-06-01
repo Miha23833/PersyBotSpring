@@ -43,7 +43,7 @@ public class ShowPlaylistsTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Show all saved playlists.";
     }
 }

@@ -63,7 +63,7 @@ public class ChangeVolumeTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Change volume of player. 0 is silence, 100 is default volume, 1000 is 10x volume boost.";
     }
 }

@@ -1,6 +1,5 @@
 package com.jerseybot.command.text.impl;
 
-import com.jerseybot.chat.MessageSendService;
 import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
@@ -9,7 +8,6 @@ import com.jerseybot.db.entities.Playlist;
 import com.jerseybot.db.entities.PlaylistId;
 import com.jerseybot.db.repositories.DiscordServerRepository;
 import com.jerseybot.db.repositories.PlayListRepository;
-import com.jerseybot.music.PlayerRepository;
 import com.jerseybot.utils.ActionHelper;
 import com.jerseybot.utils.BotUtils;
 import org.springframework.stereotype.Component;
@@ -54,7 +52,7 @@ public class PlayPlaylistTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Play saved playlist. Link may be outdated.";
     }
 }

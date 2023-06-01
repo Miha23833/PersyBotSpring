@@ -43,7 +43,7 @@ public class SkipMusicTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Skip track";
     }
 }

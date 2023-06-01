@@ -33,5 +33,5 @@ public abstract class AbstractTextCommand {
     }
     protected boolean runAfter(TextCommandExecutionContext context, CommandExecutionRsp rsp){return true;}
 
-    protected abstract String getDescription();
+    public abstract String getDescription();
 }

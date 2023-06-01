@@ -64,7 +64,7 @@ public class ShowQueueTextCommand extends AbstractTextCommand {
     }
 
     @Override
-    protected String getDescription() {
-        return null;
+    public String getDescription() {
+        return "Show scheduled track queue.";
     }
 }
