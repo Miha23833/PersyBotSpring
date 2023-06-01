@@ -13,6 +13,6 @@ public class CommandExecutionRsp {
     private Throwable exception;
 
     public boolean isOk() {
-        return message == null || exception == null;
+        return message == null && exception == null;
     }
 }
