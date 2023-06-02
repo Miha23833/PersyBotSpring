@@ -69,10 +69,10 @@ public class TextCommandRouter {
         registerRoutes(routes, changePrefixTextCommand, "prefix");
         registerRoutes(routes, mixTrackQueueTextCommand, "mix");
         registerRoutes(routes, addPlaylistTextCommand, "addplaylist", "padd");
-        registerRoutes(routes, playPlaylistTextCommand, "playlist", "pplay", "plist");
+        registerRoutes(routes, playPlaylistTextCommand, "playlist", "pplay");
+        registerRoutes(routes, showPlaylistsTextCommand, "playlists", "pshow", "plist");
         registerRoutes(routes, changeVolumeTextCommand, "volume", "v");
         registerRoutes(routes, repeatMusicTextCommand, "repeat", "roll");
-        registerRoutes(routes, showPlaylistsTextCommand, "pshow", "playlists");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }
@@ -82,6 +82,7 @@ public class TextCommandRouter {
             String command = context.getCommand();
             if ("help".equals(command) || "h".equals(command)) {
                 showHelp(context.getTextChannel());
+                return;
             }
             if (textCommandRoutes.containsKey(command)) {
                 AbstractTextCommand textCommand = textCommandRoutes.get(command);

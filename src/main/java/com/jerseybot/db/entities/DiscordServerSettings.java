@@ -42,7 +42,5 @@ public class DiscordServerSettings {
         this.prefix = prefix;
     }
 
-
-
     public DiscordServerSettings() {}
 }

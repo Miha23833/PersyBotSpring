@@ -5,7 +5,6 @@ import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import com.jerseybot.db.entities.DiscordServer;
 import com.jerseybot.db.entities.Playlist;
-import com.jerseybot.db.entities.PlaylistId;
 import com.jerseybot.db.repositories.DiscordServerRepository;
 import com.jerseybot.db.repositories.PlayListRepository;
 import com.jerseybot.utils.ActionHelper;
@@ -16,14 +15,14 @@ import java.util.Optional;
 
 @Component
 public class PlayPlaylistTextCommand extends AbstractTextCommand {
-    private final DiscordServerRepository discordServerRepository;
     private final PlayListRepository playListRepository;
+    private final DiscordServerRepository discordServerRepository;
     private final ActionHelper actionHelper;
 
-    public PlayPlaylistTextCommand(DiscordServerRepository discordServerRepository, PlayListRepository playListRepository, ActionHelper actionHelper) {
-        this.actionHelper = actionHelper;
-        this.discordServerRepository = discordServerRepository;
+    public PlayPlaylistTextCommand(PlayListRepository playListRepository, DiscordServerRepository discordServerRepository, ActionHelper actionHelper) {
         this.playListRepository = playListRepository;
+        this.discordServerRepository = discordServerRepository;
+        this.actionHelper = actionHelper;
     }
 
     @Override
@@ -41,8 +40,8 @@ public class PlayPlaylistTextCommand extends AbstractTextCommand {
 
     @Override
     protected boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
-        DiscordServer discordServer = discordServerRepository.findById(context.getGuildId()).orElseThrow();
-        Optional<Playlist> playlist = playListRepository.findById(new PlaylistId(context.getArgs().get(0), discordServer));
+        DiscordServer discordServer = discordServerRepository.getOrCreateDefault(context.getGuildId());
+        Optional<Playlist> playlist = playListRepository.findById(context.getArgs().get(0), discordServer);
         if (playlist.isEmpty()) {
             rsp.setMessage("Playlist with name '" +context.getArgs().get(0) + "' does not exist.");
             return false;

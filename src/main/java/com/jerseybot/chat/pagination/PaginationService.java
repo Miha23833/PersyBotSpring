@@ -18,6 +18,7 @@ public final class PaginationService {
         readWriteLock = new ReentrantReadWriteLock();
     }
 
+    // TODO: add cleaner by timer
     public void registerPagination(Long textChannelId, PAGEABLE_MESSAGE_TYPE type, PageableMessage msg) {
         assert textChannelId != null;
         assert msg.getMessageId() != null;

@@ -3,10 +3,9 @@ package com.jerseybot.db.entities;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -23,6 +22,10 @@ public class Playlist {
     @Column(nullable = false, columnDefinition = "TEXT")
     @Getter@Setter
     private String url;
+
+    @ManyToOne
+    @JoinColumn(name = "discord_server_id", insertable = false, updatable = false)
+    private DiscordServer discordServer;
 
     public String getName() {
         return playlistId.getName();

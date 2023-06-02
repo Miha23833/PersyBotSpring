@@ -29,7 +29,7 @@ public class ShowPlaylistsTextCommand extends AbstractTextCommand {
 
     @Override
     protected boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
-        List<Playlist> playlists = playListRepository.findAll();
+        List<Playlist> playlists = playListRepository.findAllByDiscordServerId(context.getGuildId());
         if (playlists.size() == 0) {
             rsp.setMessage("No playlist found.");
             return false;

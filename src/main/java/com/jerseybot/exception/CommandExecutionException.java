@@ -10,6 +10,12 @@ public class CommandExecutionException extends Exception{
         this.textChannelId = textChannelId;
     }
 
+    public CommandExecutionException(String message, long guildId, long textChannelId) {
+        super(message);
+        this.guildId = guildId;
+        this.textChannelId = textChannelId;
+    }
+
     @Override
     public String getMessage() {
         return super.getMessage() + "; GuildId: " + guildId + "; TextChannelId: " + textChannelId;

@@ -5,10 +5,14 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 import java.io.Serializable;
 
+@EqualsAndHashCode
 @Embeddable
 public class PlaylistId implements Serializable {
     public static final int MAX_PLAYLIST_NAME_LENGTH = 16;
@@ -17,13 +21,12 @@ public class PlaylistId implements Serializable {
     @Getter
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional=false)
-    @JoinColumn(name="discord_server_id", nullable=false)
-    private DiscordServer discordServer;
+    @Column(name = "discord_server_id")
+    private Long discordServerId;
 
     public PlaylistId(String name, DiscordServer discordServer) {
         this.name = name;
-        this.discordServer = discordServer;
+        this.discordServerId = discordServer.getDiscordServerId();
     }
     public PlaylistId() {}
 }
