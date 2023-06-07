@@ -76,7 +76,7 @@ public class TextCommandRouter {
         registerRoutes(routes, showPlaylistsTextCommand, "playlists", "pshow", "plist");
         registerRoutes(routes, changeVolumeTextCommand, "volume", "v");
         registerRoutes(routes, repeatMusicTextCommand, "repeat", "roll");
-        registerRoutes(routes, askChatGptTextCommand, "gpt", "chatgpt", "ask");
+        registerRoutes(routes, askChatGptTextCommand, "gpt", "chatgpt", "ask", "chat-gpt");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }

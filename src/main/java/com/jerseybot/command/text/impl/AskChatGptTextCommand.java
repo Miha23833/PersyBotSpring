@@ -5,6 +5,7 @@ import com.jerseybot.chat.message.template.InfoMessage;
 import com.jerseybot.command.CommandExecutionRsp;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
+import com.jerseybot.config.BotConfig;
 import com.jerseybot.utils.BotUtils;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionChunk;
@@ -30,11 +31,15 @@ import java.util.stream.Collectors;
 public class AskChatGptTextCommand extends AbstractTextCommand {
     private final OpenAiService openAiService;
     private final MessageSendService messageSendService;
+    private final int maxHistoryLength;
+    private final int streamMessageUpdateMillis;
 
     @Autowired
-    public AskChatGptTextCommand(OpenAiService openAiService, MessageSendService messageSendService) {
+    public AskChatGptTextCommand(OpenAiService openAiService, MessageSendService messageSendService, BotConfig botConfig) {
         this.openAiService = openAiService;
         this.messageSendService = messageSendService;
+        this.maxHistoryLength = botConfig.getChatgptMaxHistoryLength();
+        this.streamMessageUpdateMillis = botConfig.getChatgptStreamMessageUpdateMillis();
     }
 
     @Override
@@ -51,31 +56,42 @@ public class AskChatGptTextCommand extends AbstractTextCommand {
     @Override
     protected boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         String question = String.join(" ", context.getArgs()).trim();
-        String title = getTitleOfQuestion(question);
 
+        String title = question.substring(0, Math.min(question.length(), 100));
         ThreadChannel threadChannel;
         List<ChatMessage> history;
         if (context.getMessageChannel() instanceof ThreadChannel) {
             threadChannel = (ThreadChannel) context.getMessageChannel();
-            history = threadChannel.getIterableHistory().takeAsync(10)
-                    .thenApply((msgList) -> msgList.stream().map(msg -> new ChatMessage(ChatMessageRole.USER.value(), BotUtils.extractTextData(msg))).collect(Collectors.toList())).get();
+            history = threadChannel.getIterableHistory()
+                    .takeAsync(this.maxHistoryLength)
+                    .thenApply((msgList) -> msgList.stream().map(this::buildChatMessage).collect(Collectors.toList()))
+                    .get();
         } else {
-            messageSendService.sendInfoMessage(context.getMessageChannel(),
-                    "Question is generating. I'll create new thread for it as answer will be done.");
+            messageSendService.sendInfoMessage(context.getMessageChannel(), "Question is generating. I'll create new thread for it as answer will be done.");
             history = new ArrayList<>();
             threadChannel = createThreadChannel((TextChannel) context.getMessageChannel(), title);
         }
         history.add(new ChatMessage(ChatMessageRole.USER.value(), question));
 
         ChatCompletionRequest completionRequest = ChatCompletionRequest.builder().messages(history).model("gpt-3.5-turbo").stream(true).build();
-        Message message = threadChannel.sendMessage(new InfoMessage(title, "...").template()).complete();
+        String initialTitle = "Processing answer...";
+        Message message = threadChannel.sendMessage(new InfoMessage(initialTitle, "...").template()).complete();
 
-        openAiService.streamChatCompletion(completionRequest).subscribeWith(new MessageStreamSubscriber(title, message));
+        openAiService.streamChatCompletion(completionRequest).subscribeWith(new MessageStreamSubscriber(initialTitle, message));
         return true;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Ask Chat-GPT something! I will create new thread for conversation and send the answer to it. You can continue conversation with this command in thread.";
     }
 
     private ThreadChannel createThreadChannel(TextChannel textChannel, String title) {
         return textChannel.createThreadChannel(title).complete();
+    }
+
+    private ChatMessage buildChatMessage(Message message) {
+        return new ChatMessage(ChatMessageRole.USER.value(), BotUtils.extractTextData(message));
     }
 
     private String getTitleOfQuestion(String question) {
@@ -87,12 +103,7 @@ public class AskChatGptTextCommand extends AbstractTextCommand {
         return choices.get(0).getMessage().getContent();
     }
 
-    @Override
-    public String getDescription() {
-        return null;
-    }
-
-    private static class MessageStreamSubscriber extends DefaultSubscriber<ChatCompletionChunk> {
+    private class MessageStreamSubscriber extends DefaultSubscriber<ChatCompletionChunk> {
         private final StringBuilder builder;
         private final String title;
         private final Message message;
@@ -111,8 +122,7 @@ public class AskChatGptTextCommand extends AbstractTextCommand {
             if (text != null) {
                 builder.append(text);
             }
-            int minUpdateTimeMillis = 1000;
-            if (System.currentTimeMillis() - lastUpdatedMessageTimeMillis >= minUpdateTimeMillis) {
+            if (System.currentTimeMillis() - lastUpdatedMessageTimeMillis >= AskChatGptTextCommand.this.streamMessageUpdateMillis) {
                 updateMessage();
                 lastUpdatedMessageTimeMillis = System.currentTimeMillis();
             }
@@ -126,7 +136,9 @@ public class AskChatGptTextCommand extends AbstractTextCommand {
 
         @Override
         public void onComplete() {
-            updateMessage();
+            String content = builder.toString();
+            MessageEditBuilder messageEditBuilder = MessageEditBuilder.fromCreateData(new InfoMessage(AskChatGptTextCommand.this.getTitleOfQuestion(content), content).template());
+            message.editMessage(messageEditBuilder.build()).queue();
         }
 
         private void updateMessage() {
