@@ -5,6 +5,7 @@ import com.jerseybot.command.text.TextCommandExecutionContext;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
@@ -86,5 +87,12 @@ public interface BotUtils {
 
     static String bold(@NotNull String text) {
         return String.join("", "**", text, "**");
+    }
+
+    static String extractTextData(Message message) {
+        if (message.getEmbeds().size() == 0) {
+            return message.getContentRaw();
+        }
+        return message.getEmbeds().get(0).getDescription();
     }
 }
