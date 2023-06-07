@@ -8,6 +8,7 @@ import com.jerseybot.chat.pagination.PageableMessage;
 import com.jerseybot.command.text.AbstractTextCommand;
 import com.jerseybot.command.text.TextCommandExecutionContext;
 import com.jerseybot.command.text.impl.AddPlaylistTextCommand;
+import com.jerseybot.command.text.impl.AskChatGptTextCommand;
 import com.jerseybot.command.text.impl.ChangePrefixTextCommand;
 import com.jerseybot.command.text.impl.ChangeVolumeTextCommand;
 import com.jerseybot.command.text.impl.JoinToVoiceChannelTextCommand;
@@ -23,6 +24,7 @@ import com.jerseybot.command.text.impl.ShowQueueTextCommand;
 import com.jerseybot.command.text.impl.SkipMusicTextCommand;
 import com.jerseybot.command.text.impl.StopMusicTextCommand;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,7 +55,8 @@ public class TextCommandRouter {
                              PlayPlaylistTextCommand playPlaylistTextCommand,
                              ChangeVolumeTextCommand changeVolumeTextCommand,
                              RepeatMusicTextCommand repeatMusicTextCommand,
-                             ShowPlaylistsTextCommand showPlaylistsTextCommand) {
+                             ShowPlaylistsTextCommand showPlaylistsTextCommand,
+                             AskChatGptTextCommand askChatGptTextCommand) {
         this.messageSendService = messageSendService;
 
         Map<String, AbstractTextCommand> routes = new HashMap<>();
@@ -73,6 +76,7 @@ public class TextCommandRouter {
         registerRoutes(routes, showPlaylistsTextCommand, "playlists", "pshow", "plist");
         registerRoutes(routes, changeVolumeTextCommand, "volume", "v");
         registerRoutes(routes, repeatMusicTextCommand, "repeat", "roll");
+        registerRoutes(routes, askChatGptTextCommand, "gpt", "chatgpt", "ask", "chat-gpt");
 
         this.textCommandRoutes = Collections.unmodifiableMap(routes);
     }
@@ -81,7 +85,7 @@ public class TextCommandRouter {
         try {
             String command = context.getCommand();
             if ("help".equals(command) || "h".equals(command)) {
-                showHelp(context.getTextChannel());
+                showHelp(context.getMessageChannel());
                 return;
             }
             if (textCommandRoutes.containsKey(command)) {
@@ -100,7 +104,7 @@ public class TextCommandRouter {
         }
     }
 
-    private void showHelp(TextChannel textChannel) {
+    private void showHelp(GuildMessageChannel textChannel) {
         Map<AbstractTextCommand, List<String>> commands = new HashMap<>();
         for (Map.Entry<String, AbstractTextCommand> command : textCommandRoutes.entrySet()) {
             commands.computeIfAbsent(command.getValue(), k -> new LinkedList<>()).add(command.getKey());

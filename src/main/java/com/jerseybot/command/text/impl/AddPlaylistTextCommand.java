@@ -28,15 +28,18 @@ public class AddPlaylistTextCommand extends AbstractTextCommand {
     protected boolean validateArgs(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         if (context.getArgs().size() < 2) {
             rsp.setMessage("Need arguments: {playlist name} {url}");
+            return false;
         }
         String firstArg = context.getArgs().get(0);
         String secondArg = context.getArgs().get(1);
 
         if (firstArg.length() > PlaylistId.MAX_PLAYLIST_NAME_LENGTH) {
             rsp.setMessage("Max playlist name length is " + PlaylistId.MAX_PLAYLIST_NAME_LENGTH);
+            return false;
         }
         if (!UrlValidator.getInstance().isValid(secondArg)) {
             rsp.setMessage(secondArg + " must be a url");
+            return false;
         }
         return rsp.isOk();
     }
@@ -45,7 +48,7 @@ public class AddPlaylistTextCommand extends AbstractTextCommand {
     protected boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         DiscordServer discordServer = discordServerRepository.findById(context.getGuildId()).orElseThrow();
         playListRepository.save(new Playlist(discordServer, context.getArgs().get(0), context.getArgs().get(1)));
-        messageSendService.sendInfoMessage(context.getTextChannel(), "Playlist " + context.getArgs().get(0) + " saved.");
+        messageSendService.sendInfoMessage(context.getMessageChannel(), "Playlist " + context.getArgs().get(0) + " saved.");
         return true;
     }
 

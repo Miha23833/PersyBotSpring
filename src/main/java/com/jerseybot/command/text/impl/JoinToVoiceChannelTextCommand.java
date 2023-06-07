@@ -60,7 +60,7 @@ public class JoinToVoiceChannelTextCommand extends AbstractTextCommand {
 
         if (!BotUtils.isMemberInSameVoiceChannelAsBot(context.getEvent().getMember(), context.getGuild().getSelfMember())) {
             context.getGuild().getAudioManager().openAudioConnection(voiceChannel);
-            messageSendService.sendInfoMessage(context.getEvent().getChannel().asTextChannel(), "Connected to " + voiceChannel.getName());
+            messageSendService.sendInfoMessage(context.getEvent().getChannel().asGuildMessageChannel(), "Connected to " + voiceChannel.getName());
         }
         return true;
     }

@@ -11,6 +11,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -33,7 +35,7 @@ public class Player {
 
     private final TrackScheduler scheduler = new TrackScheduler();
 
-    private final AtomicReference<TextChannel> lastUsedTextChannel = new AtomicReference<>();
+    private final AtomicReference<GuildMessageChannel> lastUsedTextChannel = new AtomicReference<>();
 
     private boolean isOnRepeat = false;
 
@@ -46,7 +48,7 @@ public class Player {
         this.sendHandler = new AudioPlayerSendHandler(this.audioPlayer);
     }
 
-    public void scheduleTrack(String source, TextChannel rspChannel) {
+    public void scheduleTrack(String source, GuildMessageChannel rspChannel) {
         this.lastUsedTextChannel.set(rspChannel);
         this.audioSourceManager.loadItemOrdered(this, source, new AudioLoadResultHandler(source));
     }

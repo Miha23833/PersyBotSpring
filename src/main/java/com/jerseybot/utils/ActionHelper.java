@@ -28,12 +28,12 @@ public class ActionHelper {
 
         if (!BotUtils.isMemberInSameVoiceChannelAsBot(context.getEvent().getMember(), context.getGuild().getSelfMember())) {
             context.getGuild().getAudioManager().openAudioConnection(voiceChannel);
-            messageSendService.sendInfoMessage(context.getEvent().getChannel().asTextChannel(), "Connected to " + voiceChannel.getName());
+            messageSendService.sendInfoMessage(context.getEvent().getChannel().asGuildMessageChannel(), "Connected to " + voiceChannel.getName());
         }
 
         Player player = playerRepository.get(context.getGuildId());
 
-        player.scheduleTrack(requestingTrack, context.getTextChannel());
+        player.scheduleTrack(requestingTrack, context.getMessageChannel());
         if (context.getGuild().getAudioManager().getSendingHandler() == null) {
             context.getGuild().getAudioManager().setSendingHandler(player.getSendHandler());
         }

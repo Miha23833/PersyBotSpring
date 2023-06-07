@@ -25,4 +25,11 @@ public class BotConfig {
     @Getter
     @Value("${performance.player.maxInactivityTimeMillisIfPaused}")
     private int maxInactivityTimeIfPaused;
+
+    @Getter
+    @Value("${chatgpt.context.maxHistoryLength}")
+    private int chatgptMaxHistoryLength;
+    @Getter
+    @Value("${chatgpt.streamMessageUpdateMillis}")
+    private int chatgptStreamMessageUpdateMillis;
 }

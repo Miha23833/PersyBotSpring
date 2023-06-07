@@ -39,7 +39,7 @@ public class UserInteractionEventListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        if (event.getMessage().getAuthor().isBot() || !event.getMessage().getChannel().asTextChannel().canTalk()) {
+        if (event.getMessage().getAuthor().isBot() || !event.getMessage().getChannel().canTalk()) {
             return;
         }
         long guildId = event.getGuild().getIdLong();
@@ -51,7 +51,7 @@ public class UserInteractionEventListener extends ListenerAdapter {
         }
 
         if (rsp.getMessage() != null) {
-            messageSendService.sendErrorMessage(event.getMessage().getChannel().asTextChannel(), rsp.getMessage());
+            messageSendService.sendErrorMessage(event.getMessage().getChannel().asGuildMessageChannel(), rsp.getMessage());
         }
         if (rsp.getException() != null) {
             log.error("Something broke when processing command", new TextCommandExecutionException(rsp.getException(), guildId, event.getChannel().getIdLong(), event.getMessage().getContentRaw()));
@@ -69,7 +69,7 @@ public class UserInteractionEventListener extends ListenerAdapter {
                         .editMessage(MessageEditBuilder.fromMessage(event.getMessage()).setActionRow().build())
                         .queue();
                 if (rsp.getMessage() != null) {
-                    messageSendService.sendErrorMessage(event.getChannel().asTextChannel(), rsp.getMessage());
+                    messageSendService.sendErrorMessage(event.getChannel().asGuildMessageChannel(), rsp.getMessage());
                 }
                 if (rsp.getException() != null) {
                     log.error("Something broke when processing command",

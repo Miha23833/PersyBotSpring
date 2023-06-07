@@ -48,7 +48,7 @@ public class ShowQueueTextCommand extends AbstractTextCommand {
                 .map(info -> info.author + " - " + info.title + " (" + toTimeDuration(info.length) + ")")
                 .collect(Collectors.toList());
         if (queue.isEmpty()) {
-            messageSendService.sendErrorMessage(context.getTextChannel(), "The track queue is empty");
+            messageSendService.sendErrorMessage(context.getMessageChannel(), "The track queue is empty");
             return false;
         }
 
@@ -59,7 +59,7 @@ public class ShowQueueTextCommand extends AbstractTextCommand {
                 .map(part -> new InfoMessage("Now playing tracks:", String.join("\n ", part)).template())
                 .forEach(pageableMessage::addMessage);
 
-        messageSendService.sendPageableMessage(pageableMessage, context.getEvent().getChannel().asTextChannel(), PAGEABLE_MESSAGE_TYPE.PLAYER_QUEUE);
+        messageSendService.sendPageableMessage(pageableMessage, context.getEvent().getChannel().asGuildMessageChannel(), PAGEABLE_MESSAGE_TYPE.PLAYER_QUEUE);
         return true;
     }
 

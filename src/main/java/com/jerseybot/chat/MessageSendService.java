@@ -9,14 +9,12 @@ import com.jerseybot.chat.pagination.PageableMessage;
 import com.jerseybot.chat.pagination.PaginationService;
 import com.jerseybot.command.button.enums.BUTTON_ID;
 import com.jerseybot.command.button.enums.PLAYER_BUTTON;
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import jakarta.annotation.Nullable;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,19 +42,19 @@ public class MessageSendService {
         this.playerButtonIds = Stream.of(BUTTON_ID.PLAYER_PAUSE, BUTTON_ID.PLAYER_RESUME, BUTTON_ID.PLAYER_SKIP, BUTTON_ID.PLAYER_STOP).map(BUTTON_ID::getId).collect(Collectors.toSet());
     }
 
-    public void sendInfoMessage(TextChannel textChannel, String content) {
+    public void sendInfoMessage(GuildMessageChannel textChannel, String content) {
         sendInfoMessage(textChannel, "Info", content);
     }
 
-    public void sendInfoMessage(TextChannel textChannel, String title, String content) {
+    public void sendInfoMessage(GuildMessageChannel textChannel, String title, String content) {
         sendMessage(textChannel, title, content, MessageType.SIMPLE_INFORMATION);
     }
 
-    public void sendErrorMessage(TextChannel textChannel, String content) {
+    public void sendErrorMessage(GuildMessageChannel textChannel, String content) {
         sendMessage(textChannel, "Error", content, MessageType.ERROR);
     }
 
-    public void sendNowPlaying(TextChannel textChannel, AudioTrack track, boolean isPlayerPaused, boolean isNextTrackAbsent) {
+    public void sendNowPlaying(GuildMessageChannel textChannel, AudioTrack track, boolean isPlayerPaused, boolean isNextTrackAbsent) {
         if (textChannel.canTalk()) {
             textChannel
                     .sendMessage(new InfoMessage("Now playing:", getTrackTitle(track)).template())
@@ -68,14 +66,14 @@ public class MessageSendService {
         }
     }
 
-    public void sendQueuedTrack(TextChannel textChannel, AudioTrack track, boolean isPlayerPaused) {
+    public void sendQueuedTrack(GuildMessageChannel textChannel, AudioTrack track, boolean isPlayerPaused) {
         if (textChannel.canTalk()) {
             textChannel.sendMessage(new InfoMessage("Queued track: ", getTrackTitle(track)).template())
                     .queue(msg -> updatePlayerButtons(textChannel, isPlayerPaused, false));
         }
     }
 
-    public void sendPageableMessage(PageableMessage.Builder message, TextChannel channel, PAGEABLE_MESSAGE_TYPE type) {
+    public void sendPageableMessage(PageableMessage.Builder message, GuildMessageChannel channel, PAGEABLE_MESSAGE_TYPE type) {
         if (message.size() == 1) {
             channel.sendMessage(new PagingMessage(message.get(0), false, false).template()).queue();
         } else if (message.size() > 1) {
@@ -83,11 +81,11 @@ public class MessageSendService {
                     .queue(success -> paginationService.registerPagination(success.getChannel().getIdLong(), type, message.build(success.getIdLong())));
         }
     }
-    public void sendMessage(TextChannel textChannel, String title, String content) {
+    public void sendMessage(GuildMessageChannel textChannel, String title, String content) {
         sendMessage(textChannel, title, content, null);
     }
 
-    public void sendMessage(TextChannel textChannel, String title, String content, @Nullable MessageType messageType) {
+    public void sendMessage(GuildMessageChannel textChannel, String title, String content, @Nullable MessageType messageType) {
         if (textChannel.canTalk()) {
             textChannel.sendMessage(new InfoMessage(title, content).template())
                     .queue((msg) -> {
@@ -98,7 +96,7 @@ public class MessageSendService {
         }
     }
 
-    private void updatePlayerButtons(TextChannel textChannel, boolean isPlayerPaused, boolean isNextTrackAbsent) {
+    private void updatePlayerButtons(GuildMessageChannel textChannel, boolean isPlayerPaused, boolean isNextTrackAbsent) {
         textChannel.getHistory().retrievePast(10).queue(
                 lastMessagesInTextChannel -> lastMessagesInTextChannel.stream().filter(message -> {
                     if (message.getActionRows().isEmpty()) {
@@ -121,11 +119,11 @@ public class MessageSendService {
         );
     }
 
-    public void sendQueuedTracks(TextChannel textChannel, List<AudioTrack> tracks) {
+    public void sendQueuedTracks(GuildMessageChannel textChannel, List<AudioTrack> tracks) {
         sendMessage(textChannel, "Queued tracks:", getQueuedTrackMessage(tracks));
     }
 
-    public void sendRepeatingTrack(TextChannel textChannel, AudioTrack track) {
+    public void sendRepeatingTrack(GuildMessageChannel textChannel, AudioTrack track) {
         sendInfoMessage(textChannel, "Repeating: " + getTrackTitle(track));
     }
 

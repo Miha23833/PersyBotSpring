@@ -38,7 +38,7 @@ public class ShowPlaylistsTextCommand extends AbstractTextCommand {
         for (Playlist playlist: playlists) {
             sb.append("[").append(playlist.getName()).append("]").append("(").append(playlist.getUrl()).append(")\n");
         }
-        messageSendService.sendInfoMessage(context.getTextChannel(), "Available playlists:", sb.toString());
+        messageSendService.sendInfoMessage(context.getMessageChannel(), "Available playlists:", sb.toString());
         return true;
     }
 
