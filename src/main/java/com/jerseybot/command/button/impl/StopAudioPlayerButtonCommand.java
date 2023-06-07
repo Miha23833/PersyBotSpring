@@ -45,6 +45,6 @@ public class StopAudioPlayerButtonCommand implements ButtonCommand {
             message.editMessage(messageUpdated).queue();
         }
 
-        messageSendService.sendInfoMessage(message.getChannel().asTextChannel(), "Player stopped.");
+        messageSendService.sendInfoMessage(message.getChannel().asGuildMessageChannel(), "Player stopped.");
     }
 }

@@ -57,7 +57,7 @@ public class ChangeVolumeTextCommand extends AbstractTextCommand {
         discordServer.getSettings().setVolume(volume);
         discordServerRepository.save(discordServer);
 
-        messageSendService.sendInfoMessage(context.getTextChannel(), "Volume set to " + volume);
+        messageSendService.sendInfoMessage(context.getMessageChannel(), "Volume set to " + volume);
 
         return true;
     }

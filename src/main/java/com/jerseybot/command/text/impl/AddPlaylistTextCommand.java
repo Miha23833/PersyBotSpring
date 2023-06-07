@@ -45,7 +45,7 @@ public class AddPlaylistTextCommand extends AbstractTextCommand {
     protected boolean runCommand(TextCommandExecutionContext context, CommandExecutionRsp rsp) {
         DiscordServer discordServer = discordServerRepository.findById(context.getGuildId()).orElseThrow();
         playListRepository.save(new Playlist(discordServer, context.getArgs().get(0), context.getArgs().get(1)));
-        messageSendService.sendInfoMessage(context.getTextChannel(), "Playlist " + context.getArgs().get(0) + " saved.");
+        messageSendService.sendInfoMessage(context.getMessageChannel(), "Playlist " + context.getArgs().get(0) + " saved.");
         return true;
     }
 

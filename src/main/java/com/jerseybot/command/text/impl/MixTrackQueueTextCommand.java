@@ -38,7 +38,7 @@ public class MixTrackQueueTextCommand extends AbstractTextCommand {
         Player player = playerRepository.get(context.getGuildId());
         player.mixQueue();
 
-        messageSendService.sendInfoMessage(context.getTextChannel(), "Queue was mixed");
+        messageSendService.sendInfoMessage(context.getMessageChannel(), "Queue was mixed");
         return true;
     }
 

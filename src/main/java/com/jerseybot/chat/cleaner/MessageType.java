@@ -1,6 +1,5 @@
 package com.jerseybot.chat.cleaner;
 
-// TODO load count from config
 public enum MessageType {
     SIMPLE_INFORMATION(1),
 

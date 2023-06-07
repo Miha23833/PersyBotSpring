@@ -2,7 +2,7 @@ package com.jerseybot.command.text;
 
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public class TextCommandExecutionContext {
         return getGuild().getIdLong();
     }
 
-    public TextChannel getTextChannel() {
-        return this.event.getChannel().asTextChannel();
+    public GuildMessageChannel getMessageChannel() {
+        return this.event.getChannel().asGuildMessageChannel();
     }
 }
