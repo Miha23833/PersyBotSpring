@@ -67,9 +67,9 @@ public class AskChatGptTextCommand extends AbstractTextCommand {
                     .thenApply((msgList) -> msgList.stream().map(this::buildChatMessage).collect(Collectors.toList()))
                     .get();
         } else {
-            messageSendService.sendInfoMessage(context.getMessageChannel(), "Question is generating. I'll create new thread for it as answer will be done.");
-            history = new ArrayList<>();
             threadChannel = createThreadChannel((TextChannel) context.getMessageChannel(), title);
+            messageSendService.sendMessage(threadChannel, "Question", question);
+            history = new ArrayList<>();
         }
         history.add(new ChatMessage(ChatMessageRole.USER.value(), question));
 
