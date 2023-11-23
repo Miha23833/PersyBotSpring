@@ -8,12 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @SpringBootApplication
+@ComponentScan(
+        basePackages = "com.jerseybot",
+        excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com.jerseybot.functests.*")
+)
 public class App implements CommandLineRunner {
 
     @Autowired
@@ -38,7 +44,7 @@ public class App implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         // Run as JDA instance created
     }
 
