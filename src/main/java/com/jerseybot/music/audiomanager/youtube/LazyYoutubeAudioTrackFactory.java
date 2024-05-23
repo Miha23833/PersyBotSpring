@@ -1,9 +1,9 @@
 package com.jerseybot.music.audiomanager.youtube;
 
 import com.google.api.services.youtube.model.Video;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeSearchProvider;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import org.springframework.stereotype.Component;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Track;

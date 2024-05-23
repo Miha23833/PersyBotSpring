@@ -7,8 +7,8 @@ import com.jerseybot.music.audiomanager.youtube.LazyYoutubeAudioTrackFactory;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeSearchProvider;
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,6 +54,6 @@ public class AudioConfiguration {
 
     @Bean
     public YoutubeAudioSourceManager getYoutubeAudioSourceManager() {
-        return new YoutubeAudioSourceManager(true);
+        return new YoutubeAudioSourceManager();
     }
 }
