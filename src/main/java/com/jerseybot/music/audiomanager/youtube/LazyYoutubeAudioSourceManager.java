@@ -174,6 +174,7 @@ public class LazyYoutubeAudioSourceManager implements AudioSourceManager {
                 .setRegionCode(countryCodeForSearchEngine)
                 .setMaxResults(1L)
                 .setQ(title)
+                .setType(Collections.singletonList("video"))
                 .execute();
 
         if (searchRsp.getItems().isEmpty()) {
