@@ -54,6 +54,8 @@ public class AudioConfiguration {
 
     @Bean
     public YoutubeAudioSourceManager getYoutubeAudioSourceManager() {
-        return new YoutubeAudioSourceManager();
+        YoutubeAudioSourceManager manager = new YoutubeAudioSourceManager();
+        manager.useOauth2(null, false);
+        return manager;
     }
 }
