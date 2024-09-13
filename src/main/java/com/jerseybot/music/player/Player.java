@@ -10,6 +10,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -25,6 +26,7 @@ import static com.jerseybot.utils.DateTimeUtils.toTimeDuration;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class Player {
     private final DefaultAudioPlayerManager audioSourceManager;
     private final AudioPlayer audioPlayer;
@@ -151,7 +153,7 @@ public class Player {
 
         @Override
         public void loadFailed(FriendlyException exception) {
-            throw exception;
+            log.error("Could not load track\n" + exception.getMessage(), exception);
         }
     }
 
@@ -185,6 +187,7 @@ public class Player {
 
         @Override
         public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+            log.error("Track exception\n" + exception.getMessage(), exception);
             super.onTrackException(player, track, exception);
         }
 
