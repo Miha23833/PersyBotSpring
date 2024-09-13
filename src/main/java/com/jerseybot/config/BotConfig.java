@@ -32,4 +32,11 @@ public class BotConfig {
     @Getter
     @Value("${chatgpt.streamMessageUpdateMillis}")
     private int chatgptStreamMessageUpdateMillis;
+
+    @Getter
+    @Value("${yt.oauth.visitor_data}")
+    private String ytOauthVisitor_data;
+    @Getter
+    @Value("${yt.oauth.po_token}")
+    private String ytOauthPoToken;
 }

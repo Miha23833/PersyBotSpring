@@ -1,6 +1,7 @@
 package com.jerseybot;
 
 import com.jerseybot.config.BotConfig;
+import dev.lavalink.youtube.clients.Web;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -18,6 +19,7 @@ public class App implements CommandLineRunner {
 
     @Autowired
     public App(List<ListenerAdapter> listenerAdapters, BotConfig botConfig) throws InterruptedException {
+        Web.setPoTokenAndVisitorData(botConfig.getYtOauthPoToken(), botConfig.getYtOauthVisitor_data());
 
         JDABuilder.createDefault(botConfig.getToken())
                 .enableIntents(GatewayIntent.GUILD_MEMBERS,
