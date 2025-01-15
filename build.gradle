@@ -27,8 +27,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
     // LavaPlayer dependencies
-    implementation 'dev.arbjerg:lavaplayer:2.2.1'
-    implementation 'dev.lavalink.youtube:common:1.7.2'
+    implementation 'dev.arbjerg:lavaplayer:2.2.2'
+    implementation 'dev.lavalink.youtube:common:1.11.3'
 
     // Spotify API
     implementation 'se.michaelthelin.spotify:spotify-web-api-java:8.0.0'
